@@ -13,15 +13,15 @@ import ./install
 var logger = newConsoleLogger()
 addHandler(logger)
 
-proc findCommand*(cmd: string, hints: openArray[string] = @[],
-    suffixes: openarray[string] = @[], recursive: bool = true): Option[string] =
+proc findCommand*(cmd: string, globList: openArray[string] = @[]): Option[string] =
+  ##
   ## Find a given command.
   ##
-  ## If not found in PATH, try finding it in given hints and subdirs.
-  ## Tries to mimic CMake's `find_program` macro https://cmake.org/cmake/help/latest/command/find_program.html
+  ## If not found in PATH, try finding it using list of globs patterns.
+  ## See https://glob.bolingen.me/latest/glob.html for supported glob pattern.
   ##
   ## Return some(path) on success. None otherwise.
-
+  ##
   # if the given comamnd is already a full path and exists, return if
   if fileExists(cmd):
     return some(cmd)
@@ -33,45 +33,31 @@ proc findCommand*(cmd: string, hints: openArray[string] = @[],
     return some(cpath)
 
   # Now search in hints.
-  # initialize hint with default values.
-  var paths : seq[string] = @hints
-  if defined(windows):
-    paths = paths & @["C:/tools/", "C:/Program Files (x86)", "C:/Program Files"]
-  else:
-    paths = paths & @["/opt", "~/.local/bin"]
-
-  var sdirs = @suffixes
-  sdirs.add(".")
-
-  for (a, b) in product(paths, sdirs):
-    let p = expandTilde(a / b / cmd)
-    if fileExists(p):
-      return some(p)
-    if recursive:
-      var pat = fmt"{a}/**/{cmd}"
-      if b != "." and b.len > 2:
-        pat = fmt"{a}/{b}/**/{cmd}"
-      for p in walkGlob(pat):
-        info(fmt">>> {p}")
-        if fileExists(p):
-          return some(p)
-  warn(fmt">> Could not find executable for command {cmd}")
+  for pat in globList:
+    let (rootdir, magic) = pat.splitPattern
+    debug(fmt">> Searching using {magic=} in {rootdir=}.")
+    for p in walkGlob(magic, root=rootdir):
+      if fileExists(p):
+        return some(p)
+  warn(fmt"> Could not find executable for command {cmd}")
   none(string)
 
 
-proc ensureCommand*(cmd: string, pkgname: string = "",
-    hints: openArray[string] = [], suffixes: openArray[string] = []): Option[string] =
-  ## Ensure that a command exists.
+proc ensureCommand*(cmd: string, pkgname: string = "", globs: openArray[string] = []): Option[string] =
+  ##
+  ## Ensure that a command exists. If found, return the path else install the given package
+  ## `pkgame`
+  ##
   if fileExists(cmd):
     return some(cmd)
 
-  let cpath = findCommand(cmd, hints = hints, suffixes = suffixes, recursive = true)
+  let cpath = findCommand(cmd, globs)
   if cpath.isSome and fileExists(cpath.get):
     return cpath
 
   var toinstall = cmd
   if pkgname.len > 0:
-    toinstall = cmd
+    toinstall = pkgname
   warn(fmt">>> {cmd} could not be found. Trying installing {toinstall}.")
   none(string)
 
@@ -80,5 +66,6 @@ when isMainModule and detectOs(Windows):
   var c = ensureCommand("choco")
   doAssert c.isSome and fileExists(c.get)
   echo "\n\n====="
-  c = ensureCommand("msbuild.exe", "visualstudio2019community")
+  c = ensureCommand("msbuild.exe", "visualstudio2019community"
+    , globs=["C:/Program Files (x86)/Microsoft Visual Studio/**/msbuild.exe"])
   doAssert c.isSome and fileExists(c.get)
