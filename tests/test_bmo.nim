@@ -5,8 +5,15 @@
 #
 # To run these tests, simply execute `nimble test`.
 
-import unittest
+import std/os, options, strformat
+import std/logging
 
-import BMOpkg/submodule
-test "correct welcome":
-  check getWelcomeMessage() == "Hello, World!"
+import bmopkg/command
+
+var logger = newConsoleLogger()
+addHandler(logger)
+
+let cmake = find_command("cmake")
+assert cmake.isSome
+
+assert fileExists(cmake.get), fmt"{cmake=} is not found"
