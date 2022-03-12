@@ -5,7 +5,7 @@
 #
 # To run these tests, simply execute `nimble test`.
 
-import std/os, options, strformat
+import std/os, options, strformat, distros
 import std/logging
 
 import bmopkg/command
@@ -13,7 +13,14 @@ import bmopkg/command
 var logger = newConsoleLogger()
 addHandler(logger)
 
-let cmake = find_command("cmake")
+# Find cmake.
+let cmake = findCommand("cmake")
 assert cmake.isSome
 
 assert fileExists(cmake.get), fmt"{cmake=} is not found"
+
+if defined(windows):
+  echo ">>> Testing on Windows"
+  let choco = ensureCommand("choco.exe")
+  assert choco.isSome
+  assert fileExists(choco.get), fmt"Could not find {choco=}"
