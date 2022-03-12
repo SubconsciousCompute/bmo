@@ -10,9 +10,9 @@ srcDir        = "src"
 installExt    = @["nim"]
 bin           = @["bmo"]
 
-
 # Dependencies
-
-requires "nim >= 1.5"
+requires "nim >= 1.4"
 requires "fusion"
 requires "itertools"
+
+backend = "cpp"
