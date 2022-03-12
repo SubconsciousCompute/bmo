@@ -1,11 +1,10 @@
 # Install module.
 
-import std/distros
-import std/strformat
-
-import std/[os, logging, distros]
+import std/[os, logging, distros, strformat]
 
 import fusion/matching
+
+import common
 
 var logger = newConsoleLogger()
 addHandler(logger)
@@ -112,7 +111,7 @@ proc install(pkgname: string, force_yes: bool = true): bool =
     return false
   # FIXME: Should I use execCmdEx here?
   # execute the command.
-  discard execShellCmd(cmd)
+  discard execute(cmd)
   return true
 
 

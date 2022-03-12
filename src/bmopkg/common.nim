@@ -5,7 +5,7 @@ import std/[osproc, strformat]
 
 proc execute*(cmd: string, stopAtFailure: bool = true,
     workingDir: string = ""): string =
-  ## Execute a command and returns stdout + stderr.
+  ## Execute a mcommand and returns stdout + stderr.
   let r = execCmdEx(cmd, workingDir=workingDir)
   if stopAtFailure:
     doAssert r[1] == 0, fmt"Command did not succeed. `{cmd}`"
@@ -15,13 +15,12 @@ proc execute*(cmd: string, stopAtFailure: bool = true,
 when isMainModule:
   import std/distros
 
-  if defined(windows):
+  if detectOs(Windows):
     let x = execute("dir")
     echo x
     doAssert x.len > 0
-  else if defined(Linux):
+
+  if detectOs(Linux):
     let x = execute("ls")
     echo x
     doAssert x.len > 0
-
-
