@@ -7,10 +7,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: jiro4989/setup-nim-action@v1
       - run: |
-          choco install nim -y
-          refreshenv
-          echo $env:path
           nim.exe -v
           nimble.exe -v
       
