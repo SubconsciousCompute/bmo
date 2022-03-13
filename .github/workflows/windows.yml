@@ -7,7 +7,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - shell: pwsh
       - run: |
           choco install nim -y
           refreshenv
