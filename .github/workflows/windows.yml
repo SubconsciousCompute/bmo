@@ -8,8 +8,8 @@ jobs:
     steps:
     - name: Setup Nim
       run: |
-        choco install choosenim -y
-        choosenim stable
+        choco install nim -y
+        RefreshEnv
         nim -v
         nimble -v
       
