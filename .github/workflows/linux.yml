@@ -1,0 +1,14 @@
+name: Linux
+
+on: [push]
+
+jobs:
+  build_and_test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jiro4989/setup-nim-action@v1
+      - run: |
+          nimble build
+          nimble test
+      
