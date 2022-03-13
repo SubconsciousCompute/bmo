@@ -4,12 +4,9 @@ import std/[os, logging, distros, strformat]
 
 import fusion/matching
 
-import common
+import ./common
 
-var logger = newConsoleLogger()
-addHandler(logger)
-
-proc installCommand(foreignPackageName: string, noninteractive: bool = true): string =
+proc installCommand*(foreignPackageName: string, noninteractive: bool = true): string =
   ## Returns the distro's native command to install `foreignPackageName`
   ## and whether it requires root/admin rights.
   ## If `noninteractive is set to `true`, then command is modified to assume `yes` to all user

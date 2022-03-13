@@ -5,45 +5,46 @@
 
 import std/[os, strformat, distros, sequtils, options, logging]
 
-import glob
+from std/strutils import endsWith
+
 import itertools
 
 import ./install
 
-var logger = newConsoleLogger()
-addHandler(logger)
-
-proc findCommand*(cmd: string, globList: openArray[string] = @[]): Option[string] =
+proc findCommand*(name: string, hints: openArray[string] = @[]): Option[string] =
   ##
-  ## Find a given command.
+  ## Search for a given command (in the list of directories).
   ##
-  ## If not found in PATH, try finding it using list of globs patterns.
-  ## See https://glob.bolingen.me/latest/glob.html for supported glob pattern.
+  ## If not found in PATH, try finding it in the given list of directories.
   ##
   ## Return some(path) on success. None otherwise.
   ##
+  var cmd: string = name
+  if defined(Windows) and not cmd.endsWith(".exe"):
+    cmd = cmd & ".exe"
+
   # if the given comamnd is already a full path and exists, return if
   if fileExists(cmd):
     return some(cmd)
 
+  # search in normal paths.
   let cpath = findExe(cmd)
-  if cpath.len >= cmd.len:
-    debug(fmt"Found {cmd} at {cpath}")
-    assert fileExists(cpath)
+  if fileExists(cpath):
     return some(cpath)
 
   # Now search in hints.
-  for pat in globList:
-    let (rootdir, magic) = pat.splitPattern
-    debug(fmt">> Searching using {magic=} in {rootdir=}.")
-    for p in walkGlob(magic, root=rootdir):
-      if fileExists(p):
-        return some(p)
-  warn(fmt"> Could not find executable for command {cmd}")
-  none(string)
+  for hint in hints:
+    # debug(fmt">>> Walking in {hint}")
+    for d in walkDirRec(hint, yieldFilter={pcDir}):
+      let f = d / cmd
+      if f.fileExists:
+        # info(fmt">> Found {f}")
+        return some(f)
+  return none(string)
 
 
-proc ensureCommand*(cmd: string, pkgname: string = "", globs: openArray[string] = []): Option[string] =
+proc ensureCommand*(cmd: string, pkgname: string = "", globs: openArray[
+    string] = []): Option[string] =
   ##
   ## Ensure that a command exists. If found, return the path else install the given package
   ## `pkgame`
@@ -67,5 +68,5 @@ when isMainModule and detectOs(Windows):
   doAssert c.isSome and fileExists(c.get)
   echo "\n\n====="
   c = ensureCommand("msbuild.exe", "visualstudio2019community"
-    , globs=["C:/Program Files (x86)/Microsoft Visual Studio/**/msbuild.exe"])
+    , globs = ["C:/Program Files (x86)/Microsoft Visual Studio/**/msbuild.exe"])
   doAssert c.isSome and fileExists(c.get)
