@@ -9,6 +9,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: jiro4989/setup-nim-action@v1
       - run: |
-          nim.exe -v
-          nimble.exe -v
+          nimble build
+          nimble test
       
