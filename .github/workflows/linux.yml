@@ -11,4 +11,5 @@ jobs:
       - run: |
           nimble build -y
           nimble test
+          testament pat "tests/test*.nim"
       
