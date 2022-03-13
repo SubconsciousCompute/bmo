@@ -10,6 +10,9 @@ type
   SystemPkgMgr = tuple[os: string, name: string]
   PkgCommand = tuple[install: string, sudo: bool]
 
+## Const resources.
+const ChocoInstallScript : string = staticRead("../data/install_choco.ps1")
+
 proc sysPkgManager(): SystemPkgMgr =
   ##
   ## Return OS and package manager command.
@@ -107,7 +110,7 @@ proc installCommand*(pkgname: string, manager: string = ""): string =
     result = fmt"{cmds.install} {pkgname}"
 
 
-proc install_pkg(pkgname: string, force_yes: bool = true): bool =
+proc installPackage*(pkgname: string, force_yes: bool = true): bool =
   ##
   ## Install a package.
   ## User should make sure that installation is required or not.
@@ -121,13 +124,45 @@ proc install_pkg(pkgname: string, force_yes: bool = true): bool =
   discard execute(cmd)
   return true
 
+proc ensure(pkgname: string, cmd: string): string=
+  ## Ensure that a pkgname exists. If not try installing it.
+  var path = findExe(cmd)
+  if path.fileExists:
+    return path
+  discard installPackage(pkgname)
+  path = findExe(cmd)
+  doAssert path.fileExists, "Could not find {cmd} after installing {pkgname}"
+  return path
+
+proc ensureChoco(): bool=
+  ## Make sure that choco is available.
+  if not defined(windows):
+    warn("Choco is only works on Windows")
+    return false
+
+  var choco = findExe("choco")
+  if choco.fileExists:
+    info(fmt"Choco is already installed {choco}")
+    return true
+
+  discard execute(fmt"powershell.exe {ChocoInstallScript}")
+  choco = findExe("choco")
+  if not choco.fileExists:
+    warn("Unable to find choco after installation.")
+    return false
+  return true
 
 when isMainModule:
-  echo "> MainModule: Running tests"
+  echo "MainModule: Running tests"
   let x = installCommand("cmake")
   doAssert x.len > 0, fmt"Could not determine install command {x}"
   echo fmt"Install command on this platform is '{x}'"
 
-  doAssert install_pkg("cmake"), "installation successfull"
-  let cmake = findExe("cmake")
-  doAssert fileExists(cmake), fmt"{cmake} is found."
+  echo "Ensure cmake"
+  doAssert installPackage("cmake"), "installation was not successfull"
+  let cmake = ensure("cmake", "cmake")
+  echo fmt"> Found cmake {cmake}"
+  doAssert fileExists(cmake), fmt"{cmake} is not found."
+
+  echo "Ensure choco"
+  doAssert ensureChoco(), "Could not install choco"
