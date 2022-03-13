@@ -1,0 +1,16 @@
+name: Windows
+
+on: push
+
+jobs:
+  greet:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Setup Nim
+      run: |
+        choco install choosenim -y
+        choosenim stable
+        nim -v
+        nimble -v
+      
