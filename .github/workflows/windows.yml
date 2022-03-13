@@ -7,9 +7,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Setup Nim
+      uses: actions/checkout@v2
+      shell: pwsh
       run: |
         choco install nim -y
-        RefreshEnv
+        refreshenv
+        echo "Checking for installed binaries"
         nim -v
         nimble -v
       
