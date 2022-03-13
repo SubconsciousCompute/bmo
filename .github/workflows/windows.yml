@@ -10,7 +10,7 @@ jobs:
       - run: |
           choco install nim -y
           refreshenv
-          echo "Checking for installed binaries"
-          nim -v
-          nimble -v
+          echo $env:path
+          nim.exe -v
+          nimble.exe -v
       
