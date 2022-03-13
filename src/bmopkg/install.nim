@@ -6,102 +6,112 @@ import fusion/matching
 
 import ./common
 
-proc installCommand*(foreignPackageName: string, noninteractive: bool = true): string =
-  ## Returns the distro's native command to install `foreignPackageName`
-  ## and whether it requires root/admin rights.
-  ## If `noninteractive is set to `true`, then command is modified to assume `yes` to all user
-  ## questions.
-  let p = foreignPackageName
+type 
+  SystemPkgMgr = tuple[os: string, name: string]
+  PkgCommand = tuple[install: string, sudo: bool]
 
-  var res = ("", false)
-  var ni = ""
-
+proc sysPkgManager(): SystemPkgMgr =
+  ##
+  ## Return OS and package manager command.
+  ##
   when defined(windows):
-    if noninteractive:
-      ni = "--yes "
-    res = ("choco install " & ni & p, false)
+    result = ("windows", "choco")
   elif defined(bsd):
-    if noninteractive:
-      putEnv("BATCH", "yes")
-    res = ("ports install " & p, true)
+    result = ("bsd", "ports")
   elif defined(linux):
+    result[0] = "linux"
     if detectOs(Ubuntu) or detectOs(Elementary) or detectOs(Debian) or
         detectOs(KNOPPIX) or detectOs(SteamOS):
-      if noninteractive:
-        ni = "-y "
-      res = ("apt-get install " & ni & p, true)
+      result[1] = "apt"
     elif detectOs(Gentoo):
-      if noninteractive:
-        ni = "-y "
-      res = ("emerge install " & ni & p, true)
+      result[1] = "emerge"
     elif detectOs(Fedora):
-      if noninteractive:
-        ni = "-y "
-      res = ("yum install " & ni & p, true)
+      result[1] = "dnf"
     elif detectOs(RedHat):
-      if noninteractive:
-        ni = "--force "
-      res = ("rpm install " & ni & p, true)
+      result[1] = "rpm"
     elif detectOs(OpenSUSE):
-      if noninteractive:
-        ni = "--non-interactive "
-      res = ("zypper install " & ni & p, true)
+      result[1] = "zypper"
     elif detectOs(Slackware):
-      if noninteractive:
-        warn("Not sure how to handle noninteractive mode")
-      res = ("installpkg " & ni & p, true)
+      result[1] = "installpkg"
     elif detectOs(OpenMandriva):
-      if noninteractive:
-        warn("Not sure how to handle noninteractive mode")
-      res = ("urpmi " & ni & p, true)
+      result[1] = "urpmi"
     elif detectOs(ZenWalk):
-      if noninteractive:
-        warn("Not sure how to handle noninteractive mode")
-      res = ("netpkg install " & ni & p, true)
+      result[1] = "netpkg"
     elif detectOs(NixOS):
-      if noninteractive:
-        warn("Not sure how to handle noninteractive mode")
-      res = ("nix-env -i " & ni & p, false)
+      result[1] = "nix-env"
     elif detectOs(Solaris) or detectOs(FreeBSD):
-      if noninteractive:
-        ni = "-y "
-      res = ("pkg install " & ni & p, true)
+      result[1] = "pkg"
     elif detectOs(OpenBSD):
-      if noninteractive:
-        ni = "-I "
-      res = ("pkg_add " & ni & p, true)
+      result[1] = "pkg_add"
     elif detectOs(PCLinuxOS):
-      if noninteractive:
-        ni = "--force "
-      res = ("rpm -ivh " & ni & p, true)
+      result[1] = "rpm"
     elif detectOs(ArchLinux) or detectOs(Manjaro) or detectOs(Artix):
-      if noninteractive:
-        ni = "--noconfirm "
-      res = ("pacman -S " & ni & p, true)
+      result[1] = "pacman"
     elif detectOs(Void):
-      if noninteractive:
-        ni = "--yes "
-      res = ("xbps-install " & ni & p, true)
+      result[1] = "xbps-install"
     else:
-      res = ("<your package manager here> install " & p, true)
+      result = ""
   elif defined(haiku):
-    if noninteractive:
-      warn("Not sure how to handle noninteractive mode")
-    res = ("pkgman install " & ni & p, true)
+    result[1] = "pkgman"
   else:
-    if noninteractive:
-      ni = "--yes "
-    res = ("brew install " & ni & p, false)
-
-  # finally return the command.
-  result = res[0]
-  if res[1]:
-    result = "sudo " & result
+    result[1] = "brew"
 
 
-proc install(pkgname: string, force_yes: bool = true): bool =
-  ## Install a package of given pkgname.
+proc pkgManagerCommands(name: string): PkgCommand =
+  ##
+  ## Abstraction of package manager command for non-interactive use.
+  ##
+  result = case name:
+    of "choco":
+      (install: fmt"{name} install -y", sudo: false)
+    of "ports":
+      (install: fmt"{name} install", sudo: true)
+    of "apt":
+      (install: fmt"{name} install -y", sudo: true)
+    of "gentoo":
+      (install: fmt"{name} install -y", sudo: true)
+    of "dnf":
+      (install: fmt"{name} install -y", sudo: true)
+    of "rpm":
+      (install: fmt"{name} install --force", sudo: true)
+    of "zypper":
+      (install: fmt"{name} install --non-interactive", sudo: true)
+    of "nix-env":
+      (install: fmt"{name} -i", sudo: false)
+    of "pkg":
+      (install: fmt"{name} install -y", sudo: true)
+    of "pkg_add":
+      (install: fmt"{name} install -I", sudo: true)
+    of "pacman":
+      (install: fmt"{name} -S --noconfirm", sudo: true)
+    of "brew":
+      (install: fmt"{name} install -y", sudo: false)
+    else:
+      warn("Not a supported package manger {pkgmgr}")
+      (install: "<NA>", sudo: false)
+
+
+proc installCommand*(pkgname: string, manager: string = ""): string =
+  ##
+  ## Install command for given.
+  ##
+  var pkgmgr : string = manager
+  if pkgmgr.len == 0:
+    # No package manager is given, using system pkg manager.
+    pkgmgr = sysPkgManager().name
+
+  let cmds = pkgManagerCommands(pkgmgr)
+  if cmds.sudo:
+    result = fmt"sudo {cmds.install} {pkgname}"
+  else:
+    result = fmt"{cmds.install} {pkgname}"
+
+
+proc install_pkg(pkgname: string, force_yes: bool = true): bool =
+  ##
+  ## Install a package.
   ## User should make sure that installation is required or not.
+  ##
   let cmd = installCommand(pkgname)
   if cmd.len < 2:
     warn(fmt"Could not determine the install command {cmd}")
@@ -113,8 +123,11 @@ proc install(pkgname: string, force_yes: bool = true): bool =
 
 
 when isMainModule:
-  echo "Running tests"
+  echo "> MainModule: Running tests"
   let x = installCommand("cmake")
   doAssert x.len > 0, fmt"Could not determine install command {x}"
   echo fmt"Install command on this platform is '{x}'"
-  doAssert install("cmake"), "installation successfull"
+
+  doAssert install_pkg("cmake"), "installation successfull"
+  let cmake = findExe("cmake")
+  doAssert fileExists(cmake), fmt"{cmake} is found."

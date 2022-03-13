@@ -7,10 +7,16 @@ import std/[json]
 
 import ./bmopkg/command
 import ./bmopkg/install
+import ./bmopkg/subcom
 
 # initialize logger.
 var logger = newConsoleLogger()
 addHandler(logger)
+
+proc subcom(groups: seq[string]): bool=
+  ## Install tools group. 
+  for tool in tools:
+    installGroup(group)
 
 proc where(names: seq[string], hints:seq[string] = @[], add_to_path: bool = false): string =
   ## Locate a binary and optionally add to path.
