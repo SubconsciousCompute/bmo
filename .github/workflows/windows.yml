@@ -1,18 +1,17 @@
 name: Windows
 
-on: push
+on: [push]
 
 jobs:
-  bmo:
+  build_and_test_windows:
     runs-on: windows-latest
     steps:
-    - name: Setup Nim
-      uses: actions/checkout@v2
-      shell: pwsh
-      run: |
-        choco install nim -y
-        refreshenv
-        echo "Checking for installed binaries"
-        nim -v
-        nimble -v
+      - uses: actions/checkout@v2
+      - shell: pwsh
+      - run: |
+          choco install nim -y
+          refreshenv
+          echo "Checking for installed binaries"
+          nim -v
+          nimble -v
       
