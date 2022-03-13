@@ -3,9 +3,8 @@ name: Windows
 on: push
 
 jobs:
-  greet:
+  bmo:
     runs-on: windows-latest
-    
     steps:
     - name: Setup Nim
       run: |
