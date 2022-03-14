@@ -10,7 +10,8 @@ import ./bmopkg/install
 import ./bmopkg/subcom
 
 # initialize logger.
-var logger = newConsoleLogger()
+var logger = newConsoleLogger(levelThreshold = lvlAll,
+    fmtStr = "[$time] - $levelname: ")
 addHandler(logger)
 
 proc subcom(groups: seq[string]): bool =
@@ -21,10 +22,10 @@ proc subcom(groups: seq[string]): bool =
 proc where(names: seq[string], hints: seq[string] = @[],
     add_to_path: bool = false): string =
   ## Locate a binary and optionally add to path.
-  var res: seq[string] = @[]
+  var res = newJObject()
   for name in names:
-    res &= get(findCommand(name, hints), "")
-  return res.join("\n")
+    res[name] = %* get(findCommand(name, hints), "")
+  return res.pretty
 
 proc summary(): string =
   ## Summary of the system.

@@ -32,11 +32,11 @@ proc findCommand*(name: string, hints: openArray[string] = @[]): Option[string] 
 
   # Now search in hints.
   for hint in hints:
-    # debug(fmt">>> Walking in {hint}")
+    debug(fmt"> Walking in {hint}")
     for d in walkDirRec(hint, yieldFilter={pcDir}):
       let f = d / cmd
       if f.fileExists:
-        # info(fmt">> Found {f}")
+        debug(fmt">> Found {f}")
         return some(f)
   return none(string)
 
