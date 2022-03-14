@@ -50,18 +50,20 @@ proc sysPkgManager(): SystemPkgMgr =
       result[1] = "netpkg"
     elif detectOs(NixOS):
       result[1] = "nix-env"
+    elif detectOs(ArchLinux) or detectOs(Manjaro) or detectOs(Artix):
+      info("On ArchLinux or its derivative.")
+      result[1] = "pacman"
+    # Put non-Linuxy stuff here.
     elif detectOs(Solaris) or detectOs(FreeBSD):
       result[1] = "pkg"
     elif detectOs(OpenBSD):
       result[1] = "pkg_add"
     elif detectOs(PCLinuxOS):
       result[1] = "rpm"
-    elif detectOs(ArchLinux) or detectOs(Manjaro) or detectOs(Artix):
-      result[1] = "pacman"
     elif detectOs(Void):
       result[1] = "xbps-install"
     else:
-      result = ""
+      result = ("", "")
   elif defined(haiku):
     result[1] = "pkgman"
   else:
@@ -80,7 +82,11 @@ proc pkgManagerCommands(manager: string = ""): PkgCommand =
   ##
   let name = getPkgMgrName(manager)
   doAssert name.len > 0, "Could not determine package manager"
+
+  # initialize PkgCommand. Wait for Nim-2 then we can initialize fields in declaration itself.
   var cmds = new(PkgCommand)
+  cmds.sudo = true
+
   case name:
     of "choco":
       cmds.install = fmt"{name} install -y <pkg>"
@@ -144,7 +150,7 @@ proc getCommand(task: string, pkgname: string,
     return none(string)
 
   if cmd.len == 0:
-    warn(fmt"Unsupported type of task '{task}' passed to this function.")
+    warn(fmt"Unsupported type of task '{task}'.")
     return none(string)
 
   # replace placeholder <pkg> with pkgname.
@@ -244,5 +250,6 @@ when isMainModule:
   doAssert removePackage("cmake")
   doAssert ensureCommand("cmake").isSome
 
-  echo "Test: Ensure choco"
-  doAssert ensureChoco().isSome, "Could not install choco"
+  if defined windows:
+    echo "Test: Ensure choco"
+    doAssert ensureChoco().isSome, "Could not install choco"
