@@ -13,14 +13,15 @@ import ./bmopkg/subcom
 var logger = newConsoleLogger()
 addHandler(logger)
 
-proc subcom(groups: seq[string]): bool=
-  ## Install tools group. 
-  for tool in tools:
-    installGroup(group)
+proc subcom(groups: seq[string]): bool =
+  ## Install tools group.
+  for group in groups:
+    discard installGroup(group)
 
-proc where(names: seq[string], hints:seq[string] = @[], add_to_path: bool = false): string =
+proc where(names: seq[string], hints: seq[string] = @[],
+    add_to_path: bool = false): string =
   ## Locate a binary and optionally add to path.
-  var res : seq[string] = @[]
+  var res: seq[string] = @[]
   for name in names:
     res &= get(findCommand(name, hints), "")
   return res.join("\n")
@@ -29,7 +30,7 @@ proc summary(): string =
   ## Summary of the system.
   var res = newJObject()
   res["install_command"] = %* installCommand("<pkgname>")
-  return res.pretty 
+  return res.pretty
 
 when isMainModule:
   import cligen

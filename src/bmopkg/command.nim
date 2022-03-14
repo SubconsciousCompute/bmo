@@ -7,8 +7,6 @@ import std/[os, strformat, distros, sequtils, options, logging]
 
 from std/strutils import endsWith
 
-import itertools
-
 import ./install
 
 proc findCommand*(name: string, hints: openArray[string] = @[]): Option[string] =

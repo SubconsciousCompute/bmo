@@ -1,12 +1,11 @@
 ## SubCom tools.
 ## Author: Dilawar Singh <dilawar@subcom.tech>
 
-import std/tables
-import std/[strformat, sequtils]
+import std/[tables, sequtils]
 
-import ./install
+# import std/logging
 
-const Groups = {
+const Groups : Table[string, seq[string]] = {
   "minimal": @["choco", "nim", "cmake", "visualstudio2019community"]
   }.toTable
 
@@ -16,7 +15,8 @@ proc installGroupLinux(group: string): bool =
 proc installGroupWindows(group: string): bool =
   ## Install a group on Windows.
   if not Groups.contains(group):
-    warn(fmt"{group} does not exists. Available groups are: {Groups.keys.toSeq}")
+    let ks = Groups.keys.to_seq
+    # warn(fmt"{group} does not exists. Available groups are: {ks.join(',')}")
 
 proc installGroup*(group: string): bool =
   ## Install a given group.
@@ -26,7 +26,7 @@ proc installGroup*(group: string): bool =
   if defined(Linux):
     return installGroupLinux(group)
 
-  warn("Group {group} is not supported on this platform.")
+  # warn("Group {group} is not supported on this platform.")
   return false
 
 
