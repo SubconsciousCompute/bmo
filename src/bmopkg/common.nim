@@ -9,6 +9,7 @@ proc execute*(cmd: string, stopAtFailure: bool = true,
   ## Execute a mcommand and returns stdout + stderr.
   let r = execCmdEx(cmd, workingDir = workingDir)
   if stopAtFailure:
+    echo fmt">> output: {r[0]}"
     doAssert r[1] == 0, fmt"Command did not succeed. `{cmd}`"
   result = r[0]
 

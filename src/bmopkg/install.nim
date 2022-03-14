@@ -1,6 +1,6 @@
 # Install module.
 
-import std/[os, logging, distros, strformat]
+import std/[os, logging, distros, strutils, strformat]
 
 import fusion/matching
 
@@ -83,50 +83,48 @@ proc pkgManagerCommands(manager: string = ""): PkgCommand =
   var cmds = new(PkgCommand)
   case name:
     of "choco":
-      cmds.install = fmt"{name} install -y"
-      cmds.uninstall = fmt"{name} uninstall -y"
+      cmds.install = fmt"{name} install -y <pkg>"
+      cmds.uninstall = fmt"{name} uninstall -y <pkg>"
+      cmds.list_installed = fmt"{name} list --local-only"
       cmds.sudo = false
     of "ports":
-      cmds.install = fmt"{name} install"
+      cmds.install = fmt"{name} install <pkg>"
     of "apt":
-      cmds.install = fmt"{name} install -y"
+      cmds.install = fmt"{name} install -y <pkg>"
     of "emerge":
-      cmds.install = fmt"{name} install -y"
+      cmds.install = fmt"{name} install -y <pkg>"
     of "dnf":
-      cmds.install = fmt"{name} install -y"
-      cmds.uninstall = fmt"{name} remove -y"
+      cmds.install = fmt"{name} install -y <pkg>"
+      cmds.uninstall = fmt"{name} remove -y <pkg>"
     of "rpm":
-      cmds.install = fmt"{name} install --force"
+      cmds.install = fmt"{name} install --force <pkg>"
     of "zypper":
-      cmds.install = fmt"{name} install --non-interactive"
-      cmds.uninstall = fmt"{name} remove --non-interactive"
+      cmds.install = fmt"{name} install --non-interactive <pkg>"
+      cmds.uninstall = fmt"{name} remove --non-interactive <pkg>"
     of "nix-env":
-      cmds.install = fmt"{name} -i"
+      cmds.install = fmt"{name} -i <pkg>"
       cmds.sudo = false
     of "pkg":
-      cmds.install = fmt"{name} install -y"
+      cmds.install = fmt"{name} install -y <pkg>"
       cmds.sudo = true
     of "pkg_add":
-      cmds.install = fmt"{name} install -I"
+      cmds.install = fmt"{name} install -I <pkg>"
     of "pacman":
-      cmds.install = fmt"{name} -S --noconfirm"
-      cmds.uninstall = fmt"{name} -Rsc --noconfirm"
+      cmds.install = fmt"{name} -S --noconfirm <pkg>"
+      cmds.uninstall = fmt"{name} -Rsc --noconfirm <pkg>"
     of "brew":
-      cmds.install = fmt"{name} install -y"
-      cmds.install = fmt"{name} uninstall -y"
+      cmds.install = fmt"{name} install -y <pkg>"
+      cmds.install = fmt"{name} uninstall -y <pkg>"
       cmds.sudo = false
     else:
       warn("Not a supported package manger {pkgmgr}")
-      cmds.install = "<NA>"
       cmds.sudo = false
   return cmds
-
-
 
 #
 # Convert to executable commands.
 #
-proc getCommand(task: cstring, pkgname: cstring,
+proc getCommand(task: string, pkgname: string,
     manager: string = ""): Option[string] =
   ##
   ## Get command for given task such as 'install', 'uninstall', 'list' etc.
@@ -139,6 +137,8 @@ proc getCommand(task: cstring, pkgname: cstring,
     cmd = cmds.install
   elif task == "uninstall":
     cmd = cmds.uninstall
+  elif task == "list_installed":
+    cmd = cmds.list_installed
   else:
     warn(fmt"Unsupported type of task '{task}' passed to this function.")
     return none(string)
@@ -147,7 +147,8 @@ proc getCommand(task: cstring, pkgname: cstring,
     warn(fmt"Unsupported type of task '{task}' passed to this function.")
     return none(string)
 
-  cmd = fmt"{cmd} {pkgname}"
+  # replace placeholder <pkg> with pkgname.
+  cmd = replace(cmd, "<pkg>",  pkgname)
   if cmds.sudo:
     cmd = "sudo " & cmd
   return some(cmd)
@@ -199,6 +200,14 @@ proc removePackage*(pkgname: string): bool =
   discard execute(cmd.get)
   return true
 
+
+proc listInstalled(): string =
+  ## 
+  ## List installed packages.
+  ##
+  return execute(getCommand("list_installed"))
+
+
 proc ensureChoco*(): Option[string] =
   ##
   ## Make sure that choco is available.
@@ -228,6 +237,8 @@ when isMainModule:
   let x = getCommand("install", "cmake")
   doAssert x.is_some, fmt"Could not determine install command {x}"
   echo fmt"Install command on this platform is '{x.get}'"
+
+  echo listInstalled()
 
   echo "Test: Ensure cmake"
   doAssert removePackage("cmake")

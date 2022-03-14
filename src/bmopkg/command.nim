@@ -1,7 +1,9 @@
+##
 ## Command module.
 ##
 ## Author: Dilawar Singh <dilawar@subcom.tech>
 ## See the output of `git blame` as well.
+##
 
 import std/[os, strformat, distros, sequtils, options, logging]
 
