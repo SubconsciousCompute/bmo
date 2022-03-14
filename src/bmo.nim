@@ -14,10 +14,16 @@ var logger = newConsoleLogger(levelThreshold = lvlAll,
     fmtStr = "[$time] - $levelname: ")
 addHandler(logger)
 
-proc subcom(groups: seq[string]): bool =
+proc install_subcom(groups: seq[string]): bool =
   ## Install tools group.
   for group in groups:
     discard installGroup(group)
+
+proc install(pkgnames: seq[string]): bool =
+  ## Install tools group.
+  for pkgname in pkgnames:
+    discard installPackage(pkgname)
+
 
 proc where(names: seq[string], hints: seq[string] = @[],
     add_to_path: bool = false): string =

@@ -6,12 +6,20 @@ import fusion/matching
 
 import ./common
 
-type 
+type
   SystemPkgMgr = tuple[os: string, name: string]
-  PkgCommand = tuple[install: string, sudo: bool]
+  ## Abstractions of commands (for non-interactive use)
+  PkgCommand = ref object
+    install: string        # install a package
+    uninstall: string      # uninstall a package
+    upgrade_all: string    # upgrade all installed packages
+    update: string         # update a package
+    list_installed: string # list installed  packages.
+    search: string         # search a package.
+    sudo: bool
 
 ## Const resources.
-const ChocoInstallScript : string = staticRead("../data/install_choco.ps1")
+const ChocoInstallScript: string = staticRead("../data/install_choco.ps1")
 
 proc sysPkgManager(): SystemPkgMgr =
   ##
@@ -59,110 +67,171 @@ proc sysPkgManager(): SystemPkgMgr =
   else:
     result[1] = "brew"
 
+proc getPkgMgrName(name: string = ""): string =
+  # helper function.
+  if name.len == 0:
+    return sysPkgManager().name
+  return name
 
-proc pkgManagerCommands(name: string): PkgCommand =
+proc pkgManagerCommands(manager: string = ""): PkgCommand =
   ##
-  ## Abstraction of package manager command for non-interactive use.
+  ## Abstraction of package manager command for non-interactive use. If package manager name is not
+  ## given, it is computed.
   ##
-  result = case name:
+  let name = getPkgMgrName(manager)
+  doAssert name.len > 0, "Could not determine package manager"
+  var cmds = new(PkgCommand)
+  case name:
     of "choco":
-      (install: fmt"{name} install -y", sudo: false)
+      cmds.install = fmt"{name} install -y"
+      cmds.uninstall = fmt"{name} uninstall -y"
+      cmds.sudo = false
     of "ports":
-      (install: fmt"{name} install", sudo: true)
+      cmds.install = fmt"{name} install"
     of "apt":
-      (install: fmt"{name} install -y", sudo: true)
-    of "gentoo":
-      (install: fmt"{name} install -y", sudo: true)
+      cmds.install = fmt"{name} install -y"
+    of "emerge":
+      cmds.install = fmt"{name} install -y"
     of "dnf":
-      (install: fmt"{name} install -y", sudo: true)
+      cmds.install = fmt"{name} install -y"
+      cmds.uninstall = fmt"{name} remove -y"
     of "rpm":
-      (install: fmt"{name} install --force", sudo: true)
+      cmds.install = fmt"{name} install --force"
     of "zypper":
-      (install: fmt"{name} install --non-interactive", sudo: true)
+      cmds.install = fmt"{name} install --non-interactive"
+      cmds.uninstall = fmt"{name} remove --non-interactive"
     of "nix-env":
-      (install: fmt"{name} -i", sudo: false)
+      cmds.install = fmt"{name} -i"
+      cmds.sudo = false
     of "pkg":
-      (install: fmt"{name} install -y", sudo: true)
+      cmds.install = fmt"{name} install -y"
+      cmds.sudo = true
     of "pkg_add":
-      (install: fmt"{name} install -I", sudo: true)
+      cmds.install = fmt"{name} install -I"
     of "pacman":
-      (install: fmt"{name} -S --noconfirm", sudo: true)
+      cmds.install = fmt"{name} -S --noconfirm"
+      cmds.uninstall = fmt"{name} -Rsc --noconfirm"
     of "brew":
-      (install: fmt"{name} install -y", sudo: false)
+      cmds.install = fmt"{name} install -y"
+      cmds.install = fmt"{name} uninstall -y"
+      cmds.sudo = false
     else:
       warn("Not a supported package manger {pkgmgr}")
-      (install: "<NA>", sudo: false)
+      cmds.install = "<NA>"
+      cmds.sudo = false
+  return cmds
 
 
-proc installCommand*(pkgname: string, manager: string = ""): string =
+
+#
+# Convert to executable commands.
+#
+proc getCommand(task: cstring, pkgname: cstring,
+    manager: string = ""): Option[string] =
   ##
-  ## Install command for given.
+  ## Get command for given task such as 'install', 'uninstall', 'list' etc.
   ##
-  var pkgmgr : string = manager
-  if pkgmgr.len == 0:
-    # No package manager is given, using system pkg manager.
-    pkgmgr = sysPkgManager().name
-
+  let pkgmgr = getPkgMgrName(manager)
   let cmds = pkgManagerCommands(pkgmgr)
-  if cmds.sudo:
-    result = fmt"sudo {cmds.install} {pkgname}"
+
+  var cmd = ""
+  if task == "install":
+    cmd = cmds.install
+  elif task == "uninstall":
+    cmd = cmds.uninstall
   else:
-    result = fmt"{cmds.install} {pkgname}"
+    warn(fmt"Unsupported type of task '{task}' passed to this function.")
+    return none(string)
+
+  if cmd.len == 0:
+    warn(fmt"Unsupported type of task '{task}' passed to this function.")
+    return none(string)
+
+  cmd = fmt"{cmd} {pkgname}"
+  if cmds.sudo:
+    cmd = "sudo " & cmd
+  return some(cmd)
 
 
+#
+# Other tasks.
+#
 proc installPackage*(pkgname: string, force_yes: bool = true): bool =
   ##
   ## Install a package.
   ## User should make sure that installation is required or not.
   ##
-  let cmd = installCommand(pkgname)
-  if cmd.len < 2:
-    warn(fmt"Could not determine the install command {cmd}")
-    return false
+  let cmd = getCommand("install", pkgname)
+  doAssert cmd.is_some, "Could not determine install command."
+
   # FIXME: Should I use execCmdEx here?
   # execute the command.
-  discard execute(cmd)
+  discard execute(cmd.get)
   return true
 
-proc ensure(pkgname: string, cmd: string): string=
+
+proc ensureCommand*(cmd: string, package: string = ""): Option[string] =
+  ##
   ## Ensure that a pkgname exists. If not try installing it.
+  ##
   var path = findExe(cmd)
   if path.fileExists:
-    return path
-  discard installPackage(pkgname)
-  path = findExe(cmd)
-  doAssert path.fileExists, "Could not find {cmd} after installing {pkgname}"
-  return path
+    return some(path)
 
-proc ensureChoco(): bool=
+  var pkgname = package
+  if pkgname.len == 0:
+    pkgname = cmd
+
+  doAssert installPackage(pkgname), fmt"Installation of {pkgname} failed"
+  path = findExe(cmd)
+  if path.fileExists:
+    return some(path)
+  none(string)
+
+
+proc removePackage*(pkgname: string): bool =
+  ##
+  ## Remove a program. Return 'true' on success, `false` on failure. If the package was not
+  ## installed then returns `true`.
+  ##
+  let cmd = getCommand("uninstall", pkgname)
+  doAssert cmd.isSome, "Could not determine uninstall command"
+  discard execute(cmd.get)
+  return true
+
+proc ensureChoco*(): Option[string] =
+  ##
   ## Make sure that choco is available.
+  ## It can't be handled by ensureCommand because choco requires executing its own script.
+  ##
   if not defined(windows):
     warn("Choco is only works on Windows")
-    return false
+    return none(string)
 
   var choco = findExe("choco")
   if choco.fileExists:
     info(fmt"Choco is already installed {choco}")
-    return true
+    return some(choco)
 
   discard execute(fmt"powershell.exe {ChocoInstallScript}")
   choco = findExe("choco")
   if not choco.fileExists:
     warn("Unable to find choco after installation.")
-    return false
-  return true
+    return none(string)
+  return some(choco)
 
+#
+# Module specific tests
+#
 when isMainModule:
-  echo "MainModule: Running tests"
-  let x = installCommand("cmake")
-  doAssert x.len > 0, fmt"Could not determine install command {x}"
-  echo fmt"Install command on this platform is '{x}'"
+  echo "\n\n>> MainModule: Running tests"
+  let x = getCommand("install", "cmake")
+  doAssert x.is_some, fmt"Could not determine install command {x}"
+  echo fmt"Install command on this platform is '{x.get}'"
 
-  echo "Ensure cmake"
-  doAssert installPackage("cmake"), "installation was not successfull"
-  let cmake = ensure("cmake", "cmake")
-  echo fmt"> Found cmake {cmake}"
-  doAssert fileExists(cmake), fmt"{cmake} is not found."
+  echo "Test: Ensure cmake"
+  doAssert removePackage("cmake")
+  doAssert ensureCommand("cmake").isSome
 
-  echo "Ensure choco"
-  doAssert ensureChoco(), "Could not install choco"
+  echo "Test: Ensure choco"
+  doAssert ensureChoco().isSome, "Could not install choco"
