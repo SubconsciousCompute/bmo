@@ -1,17 +1,30 @@
 ## Common utilities
 ##
 
-import std/[os, osproc, strformat]
+import std/[os, logging, osproc, strutils, strformat]
 import std/[jsonutils, json, tables]
 
-proc execute*(cmd: string, stopAtFailure: bool = true,
+proc executeBlocking*(cmd: string, stopAtFailure: bool = true,
     workingDir: string = ""): string =
   ## Execute a mcommand and returns stdout + stderr.
+  info(fmt"> Executing '{cmd}'")
   let r = execCmdEx(cmd, workingDir = workingDir)
   if stopAtFailure:
-    echo fmt">> output: {r[0]}"
-    doAssert r[1] == 0, fmt"Command did not succeed. `{cmd}`"
+    doAssert r[1] == 0, &"Command `{cmd}` did not succeed.\n\n\tOutput:\n{r[0]}"
   result = r[0]
+
+proc execute*(cmd: string, stopAtFailure: bool = true,
+    workingDir: string = "", timeout: int = 120): string =
+  ## Execute a mcommand and returns stdout + stderr.
+  info(fmt"> Executing '{cmd}'. Timeout {timeout} sec")
+  let fs = cmd.splitWhiteSpace
+  let p = startProcess(fs[0], workingDir = workingDir, args=fs[1..^1])
+  for line in p.lines:
+    info(fmt"{fs[0]}: {line}")
+    result &= line & '\n'
+  let st = waitForExit(p, timeout)
+  if stopAtFailure:
+    doAssert st == 0, fmt"Command `{cmd}` did not succeed."
 
 
 proc readEnvJson*(): JsonNode =
@@ -25,9 +38,10 @@ proc readEnvJson*(): JsonNode =
 when isMainModule:
   import std/distros
 
+  echo("\n\n====\nModule tests")
   if detectOs(Windows):
+    echo ">> Execute dir\n"
     let x = execute("dir")
-    echo x
     doAssert x.len > 0
 
   if detectOs(Linux):

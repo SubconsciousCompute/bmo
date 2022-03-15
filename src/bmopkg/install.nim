@@ -1,6 +1,8 @@
-# Install module.
+##
+## Install module.
+##
 
-import std/[os, logging, distros, strutils, strformat]
+import std/[os, logging, distros, strutils, sequtils, strformat]
 
 import fusion/matching
 
@@ -9,7 +11,7 @@ import ./common
 type
   SystemPkgMgr = tuple[os: string, name: string]
   ## Abstractions of commands (for non-interactive use)
-  PkgCommand = ref object
+  PkgCommand* = ref object
     install: string        # install a package
     uninstall: string      # uninstall a package
     upgrade_all: string    # upgrade all installed packages
@@ -17,6 +19,13 @@ type
     list_installed: string # list installed  packages.
     search: string         # search a package.
     sudo: bool
+  ## Information related to a package.
+  PkgInfo* = object 
+    name*: string
+    version*: string
+
+proc toTxt*(p: PkgInfo): string =
+  return fmt"{p.name} {p.version}"
 
 ## Const resources.
 const ChocoInstallScript: string = staticRead("../data/install_choco.ps1")
@@ -75,7 +84,7 @@ proc getPkgMgrName(name: string = ""): string =
     return sysPkgManager().name
   return name
 
-proc pkgManagerCommands(manager: string = ""): PkgCommand =
+proc pkgManagerCommands*(manager: string = ""): PkgCommand =
   ##
   ## Abstraction of package manager command for non-interactive use. If package manager name is not
   ## given, it is computed.
@@ -90,8 +99,8 @@ proc pkgManagerCommands(manager: string = ""): PkgCommand =
   case name:
     of "choco":
       cmds.install = fmt"{name} install -y <pkg>"
-      cmds.uninstall = fmt"{name} uninstall -y <pkg>"
-      cmds.list_installed = fmt"{name} list --local-only"
+      cmds.uninstall = fmt"{name} uninstall -y --force <pkg>"
+      cmds.list_installed = fmt"{name} list --local-only --no-color"
       cmds.sudo = false
     of "ports":
       cmds.install = fmt"{name} install <pkg>"
@@ -130,10 +139,10 @@ proc pkgManagerCommands(manager: string = ""): PkgCommand =
 #
 # Convert to executable commands.
 #
-proc getCommand(task: string, pkgname: string,
+proc getCommand(task: string, pkgname: string = "",
     manager: string = ""): Option[string] =
   ##
-  ## Get command for given task such as 'install', 'uninstall', 'list' etc.
+  ## Get command for given task such as 'install', 'uninstall', 'list_installed' etc.
   ##
   let pkgmgr = getPkgMgrName(manager)
   let cmds = pkgManagerCommands(pkgmgr)
@@ -154,22 +163,58 @@ proc getCommand(task: string, pkgname: string,
     return none(string)
 
   # replace placeholder <pkg> with pkgname.
-  cmd = replace(cmd, "<pkg>",  pkgname)
+  cmd = replace(cmd, "<pkg>", pkgname)
   if cmds.sudo:
     cmd = "sudo " & cmd
   return some(cmd)
+
+proc listInstalledPkgs*(): seq[PkgInfo] =
+  ##
+  ## List installed packages.
+  ##
+  let pkgmgr = getPkgMgrName()
+  let cmd = getCommand("list_installed", manager = pkgmgr)
+  var res: string = ""
+  if not cmd.is_some:
+    warn("Could not determine the list_installed command");
+    return @[]
+
+  res = execute(cmd.get)
+  var pkgs: seq[PkgInfo] = @[]
+  for x in res.splitLines:
+    let fs = x.strip.splitWhiteSpace
+    if pkgmgr == "choco":
+      if fs.len == 2:
+        pkgs.add(PkgInfo(name: fs[0], version: fs[1]))
+  return pkgs
+
+
+proc isInstalled*(pkgname: string) : bool=
+  ##
+  ## Checks if a package is already installed.
+  ##
+  let ls = listInstalledPkgs()
+  if not ls.anyIt(it.name.toLower == pkgname.toLower):
+    info(fmt"{pkgname} is not installed on this system.")
+    return false
+  return true
 
 
 #
 # Other tasks.
 #
-proc installPackage*(pkgname: string, force_yes: bool = true): bool =
+proc installPackage*(pkgname: string, force: bool = false): bool =
   ##
   ## Install a package.
   ## User should make sure that installation is required or not.
   ##
   let cmd = getCommand("install", pkgname)
   doAssert cmd.is_some, "Could not determine install command."
+
+  # check if the package is already installed.
+  if not force and isInstalled(pkgname):
+    info(fmt"{pkgname} is alredy installed. Use `force=true` to force reinstall")
+    return true
 
   # FIXME: Should I use execCmdEx here?
   # execute the command.
@@ -195,6 +240,19 @@ proc ensureCommand*(cmd: string, package: string = ""): Option[string] =
     return some(path)
   none(string)
 
+proc ensurePackage*(pkgname: string): bool=
+  ## 
+  ## Make sure that a package exists on system. Note that this is different than `ensureCommand`
+  ## function. Unlike this function, `ensureCommand` will not install a package is a given `cmd` is
+  ## found. For example, `ensureCommand('cmake')` may not install `cmake` using choco if `cmake` is
+  ## found in PATH installed by some other method.
+  ##
+  let ls = listInstalledPkgs()
+  if ls.anyIt(it.name.toLower == pkgname.toLower):
+    return true
+  doAssert installPackage(pkgname), fmt"Installation of {pkgname} failed."
+  return true
+
 
 proc removePackage*(pkgname: string): bool =
   ##
@@ -206,12 +264,6 @@ proc removePackage*(pkgname: string): bool =
   discard execute(cmd.get)
   return true
 
-
-proc listInstalled(): string =
-  ## 
-  ## List installed packages.
-  ##
-  return execute(getCommand("list_installed"))
 
 
 proc ensureChoco*(): Option[string] =
@@ -244,11 +296,8 @@ when isMainModule:
   doAssert x.is_some, fmt"Could not determine install command {x}"
   echo fmt"Install command on this platform is '{x.get}'"
 
-  echo listInstalled()
-
-  echo "Test: Ensure cmake"
-  doAssert removePackage("cmake")
-  doAssert ensureCommand("cmake").isSome
+  doAssert ensurePackage("cmake")
+  doAssert isInstalled("cmake"), "Failed to find cmake after installation"
 
   if defined windows:
     echo "Test: Ensure choco"
