@@ -13,13 +13,19 @@ jobs:
         
       - name: "Build and test"
         run: |
-          nimble build -y
+          nimble build  -d:release -y
           nimble test
           testament pat "tests/test*.nim"
 
       - name: "Build docs"
         run: |
           nimble html
+
+      - name: "Upload executable"
+        uses: actions/upload-artifact@v3
+        with:
+          name: bmo
+          path: ./bmo
 
       - name: "Deploy Pages"
         uses: peaceiris/actions-gh-pages@v3

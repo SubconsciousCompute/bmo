@@ -8,3 +8,6 @@ test: build
 
 doc:
 	nimble html
+
+release:
+	nimble build -d:release --opt:size  
