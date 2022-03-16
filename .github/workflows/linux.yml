@@ -10,12 +10,14 @@ jobs:
 
       - name: "Build and test"
         uses: jiro4989/setup-nim-action@v1
-        run: nimble build -y
-        run: nimble test
-        run: testament pat "tests/test*.nim"
+        run: |
+          nimble build -y
+          nimble test
+          testament pat "tests/test*.nim"
 
       - name: "Build docs"
-        run: nimble html
+        run: |
+          nimble html
 
       - name: "Deploy Pages"
         uses: peaceiris/actions-gh-pages@v3
