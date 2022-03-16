@@ -28,7 +28,7 @@ proc toTxt*(p: PkgInfo): string =
   return fmt"{p.name} {p.version}"
 
 ## Const resources.
-const ChocoInstallScript: string = staticRead("../data/install_choco.ps1")
+const ChocoInstallScript: string = staticRead("../../data/install_choco.ps1")
 
 proc sysPkgManager(): SystemPkgMgr =
   ##

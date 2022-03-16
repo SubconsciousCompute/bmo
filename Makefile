@@ -1,4 +1,4 @@
-all : build
+all : build doc
 
 build:
 	nimble build
@@ -6,3 +6,5 @@ build:
 test: build
 	nimble test 
 
+doc:
+	nimble html

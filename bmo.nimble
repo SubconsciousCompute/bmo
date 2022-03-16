@@ -1,3 +1,5 @@
+import std/strformat 
+
 # Package
 
 version       = "0.1.0"
@@ -18,5 +20,8 @@ requires "cligen"
 
 
 task html, "generate HTML docs":
+
   echo "generating docs in htmldocs"
-  selfExec "doc --project --index:on --outdir:htmldocs src/bmo.nim"
+  let outdir = "htmldocs"
+  selfExec fmt"doc --project --index:on --outdir:{outdir} src/bmo.nim"
+  mvFile outdir & "/bmo.html", outdir & "/index.html"
