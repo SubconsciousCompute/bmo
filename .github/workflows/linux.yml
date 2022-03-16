@@ -22,7 +22,7 @@ jobs:
           nimble html
 
       - name: "Release"
-        uses: ncipollo/release-actions@v1
+        uses: ncipollo/release-action@v1
         if: ${{ github.ref_type == 'tag' }}
         with:
           artifacts: bmo
