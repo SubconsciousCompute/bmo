@@ -22,8 +22,8 @@ jobs:
           nimble html
 
       - name: "Release"
+        if: github.ref_type == 'tag'
         uses: ncipollo/release-action@v1
-        if: ${{ github.ref_type == tag }}
         with:
           artifacts: bmo
           token: ${{ secrets.GITHUB_TOKEN }}

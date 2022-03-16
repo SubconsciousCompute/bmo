@@ -7,7 +7,19 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: jiro4989/setup-nim-action@v1
-      - run: nimble build -y
-      - run: nimble test
-      - run: testament pat "tests/test*.nim"
+
+      - name:  "Setup Nim"
+        uses: jiro4989/setup-nim-action@v1
+
+      - name : "Build and test"
+        run: |
+          nimble build -d:release -y
+          nimble test tests/test*.nim"
+
+      - name: "Release"
+        if: github.ref_type == 'tag'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: bmo.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+
