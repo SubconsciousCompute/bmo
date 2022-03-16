@@ -21,11 +21,12 @@ jobs:
         run: |
           nimble html
 
-      - name: "Upload executable"
-        uses: actions/upload-artifact@v3
+      - name: "Release"
+        uses: ncipollo/release-actions@v1
+        if: ${{ github.ref_type == 'tag' }}
         with:
-          name: bmo
-          path: ./bmo
+          artifacts: bmo
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Deploy Pages"
         uses: peaceiris/actions-gh-pages@v3
@@ -33,4 +34,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./htmldocs
-    
