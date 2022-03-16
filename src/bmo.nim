@@ -11,7 +11,7 @@ import ./bmopkg/install
 import ./bmopkg/subcom
 
 # initialize logger.
-var logger = newConsoleLogger(levelThreshold = lvlAll, useStdErr = true,
+var logger = newConsoleLogger(levelThreshold = lvlInfo, useStdErr = true,
     fmtStr = "[$time] - $levelname: ")
 addHandler(logger)
 

@@ -20,7 +20,7 @@ proc execute*(cmd: string, stopAtFailure: bool = true,
   let fs = cmd.splitWhiteSpace
   let p = startProcess(fs[0], workingDir = workingDir, args=fs[1..^1])
   for line in p.lines:
-    info(fmt"{fs[0]}: {line}")
+    debug(fmt"{fs[0]}: {line}")
     result &= line & '\n'
   let st = waitForExit(p, timeout)
   if stopAtFailure:

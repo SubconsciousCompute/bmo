@@ -60,7 +60,7 @@ proc sysPkgManager(): SystemPkgMgr =
     elif detectOs(NixOS):
       result[1] = "nix-env"
     elif detectOs(ArchLinux) or detectOs(Manjaro) or detectOs(Artix):
-      info("On ArchLinux or its derivative.")
+      debug("On ArchLinux or its derivative.")
       result[1] = "pacman"
     # Put non-Linuxy stuff here.
     elif detectOs(Solaris) or detectOs(FreeBSD):
@@ -213,7 +213,7 @@ proc installPackage*(pkgname: string, force: bool = false): bool =
 
   # check if the package is already installed.
   if not force and isInstalled(pkgname):
-    info(fmt"{pkgname} is alredy installed. Use `force=true` to force reinstall")
+    info(fmt"{pkgname} is already installed. Use `force=true` to force reinstall")
     return true
 
   # FIXME: Should I use execCmdEx here?

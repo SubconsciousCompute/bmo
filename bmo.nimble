@@ -15,3 +15,8 @@ bin           = @["bmo"]
 requires "nim >= 1.6"
 requires "fusion"
 requires "cligen"
+
+
+task html, "generate HTML docs":
+  echo "generating docs in htmldocs"
+  selfExec "doc --project --index:on --outdir:htmldocs src/bmo.nim"
