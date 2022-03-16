@@ -1,0 +1,2 @@
+findCommand	bmopkg/command.html#findCommand,string,openArray[string]	command: findCommand(name: string; hints: openArray[string] = @[]): Option[string]	
+ensureCommand	bmopkg/command.html#ensureCommand,string,string,openArray[string]	command: ensureCommand(cmd: string; pkgname: string = &quot;&quot;; globs: openArray[string] = []): Option[\n    string]	
