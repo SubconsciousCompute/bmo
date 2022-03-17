@@ -14,7 +14,8 @@ jobs:
       - name : "Build and test"
         run: |
           nimble build -d:release -y
-          nimble test tests/test*.nim"
+          nimble test 
+          testament pat "tests/test*.nim"
 
       - name: "Release"
         if: github.ref_type == 'tag'
