@@ -3,17 +3,15 @@ __email__ = "dilawar@subcom.tech"
 
 from typing import Optional
 
+from loguru import logger
+
 import typer
 
+# Local
+import bmo.network
+
 app = typer.Typer()
-
-@app.command()
-def wifi(name: Optional[str] = None):
-    if name:
-        typer.echo(f"Hello {name}")
-    else:
-        typer.echo("Hello World!")
-
+app.add_typer(bmo.network.app, name="network")
 
 @app.command()
 def bye(name: Optional[str] = None):
