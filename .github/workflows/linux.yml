@@ -8,29 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup
-        uses: jiro4989/setup-nim-action@v1
-        
       - name: "Build and test"
         run: |
-          nimble build  -d:release -y
-          nimble test
-          testament pat "tests/test*.nim"
-
-      - name: "Build docs"
-        run: |
-          nimble html
-
-      - name: "Release"
-        if: github.ref_type == 'tag'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: bmo
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Deploy Pages"
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./htmldocs
+          python -m pip install poetry -y
+          poetry install 
+          poetry run pytest 
+          poetry run mypy bmo

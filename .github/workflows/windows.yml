@@ -8,19 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name:  "Setup Nim"
-        uses: jiro4989/setup-nim-action@v1
-
       - name : "Build and test"
         run: |
-          nimble build -d:release -y
-          nimble test 
-          testament pat "tests/test*.nim"
-
-      - name: "Release"
-        if: github.ref_type == 'tag'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: bmo.exe
-          token: ${{ secrets.GITHUB_TOKEN }}
+          python -m pip install poetry -y 
+          poetry install
+          poetry run mypy bmo 
+          poetry run pylint -E .
 
