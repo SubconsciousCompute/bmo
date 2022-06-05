@@ -2,27 +2,13 @@
 
 import datetime
 
-import typer
+from scapy.all import sr1, srp, Ether, IP, ICMP
 
 from loguru import logger
 
+import typer
+
 app = typer.Typer()
-
-
-class WifiConnection:
-    """docstring for WifiConnection"""
-
-    def __init__(self):
-        logger.info("WiFi connection")
-        self.last_tested_on = datetime.datetime.now()
-
-    def speed_test(self):
-        now = datetime.datetime.now()
-        if now - self.last_tested_on < 100:
-            logger.warning("Called too soon")
-            return False
-        logger.info("Calling speedtest")
-        return True
 
 
 @app.command()
@@ -43,3 +29,12 @@ def speedtest():
     res["download"] = res["download"] / 1024 / 1024
     res["upload"] = res["download"] / 1024 / 1024
     print(res)
+
+
+@app.command()
+def scan():
+    """Scanning the network"""
+    logger.info("Scanning local network")
+    ans, unans = srp(
+        Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst="192.168.1.0/24"), timeout=2
+    )

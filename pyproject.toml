@@ -10,7 +10,7 @@ python = "^3.8"
 speedtest-cli = "^2.1.3"
 typer = "^0.4.1"
 loguru = "^0.6.0"
-scapy = {version = "^2.4.5", optional = true}
+scapy = "^2.4.5"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.960"
