@@ -8,11 +8,12 @@ from loguru import logger
 
 app = typer.Typer()
 
-class WifiConnection():
+
+class WifiConnection:
     """docstring for WifiConnection"""
 
     def __init__(self):
-        logger.info('WiFi connection')
+        logger.info("WiFi connection")
         self.last_tested_on = datetime.datetime.now()
 
     def speed_test(self):
@@ -27,6 +28,7 @@ class WifiConnection():
 @app.command()
 def speedtest():
     import speedtest as _st
+
     logger.info("Running speedtest")
     s = _st.Speedtest()
     s.get_servers([])
@@ -38,6 +40,6 @@ def speedtest():
     except Exception as e:
         pass
     res = s.results.dict()
-    res['download'] = res['download'] / 1024 / 1024 
-    res['upload'] = res['download'] / 1024 / 1024 
+    res["download"] = res["download"] / 1024 / 1024
+    res["upload"] = res["download"] / 1024 / 1024
     print(res)

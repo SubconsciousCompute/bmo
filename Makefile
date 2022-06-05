@@ -18,3 +18,7 @@ test:
 	poetry install 
 	poetry run pytest tests
 	poetry run bmo --help
+
+fix:
+	poetry run black bmo
+	poetry run black tests
