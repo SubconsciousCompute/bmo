@@ -1,24 +1,27 @@
+PYTHON := /mingw64/bin/python.exe
+POETRY := $(PYTHON) -m poetry
+
 all : lint build
 
 
 build:
-	poetry install
-	poetry build 
+	$(POETRY) install
+	$(POETRY) build 
 
 lint:
-	poetry install
-	poetry run mypy --ignore-missing-imports bmo
-	poetry run pylint -E bmo tests
+	$(POETRY) install
+	$(POETRY) run mypy --ignore-missing-imports bmo
+	$(POETRY) run pylint -E bmo tests
 
 install:
-	poetry install 
+	$(POETRY) install 
 
 
 test:
-	poetry install 
-	poetry run pytest tests
-	poetry run bmo --help
+	$(POETRY) install 
+	$(POETRY) run pytest tests
+	$(POETRY) run bmo --help
 
 fix:
-	poetry run black bmo
-	poetry run black tests
+	$(POETRY) run black bmo
+	$(POETRY) run black tests
