@@ -16,8 +16,8 @@ app = typer.Typer()
 
 @app.command()
 def doctor() -> str:
-    logger.warning('Not implemented')
-    return ''
+    logger.warning("Not implemented")
+    return ""
 
 
 if __name__ == "__main__":
