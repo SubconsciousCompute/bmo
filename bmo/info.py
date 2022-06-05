@@ -4,6 +4,7 @@ __email__ = "dilawar@subcom.tech"
 # info module.
 # Execute `bmo info` to print system information
 
+import sys
 import json
 import platform
 import typing as T
@@ -46,7 +47,9 @@ def system() -> str:
     res["OS"] = which_os()
     assert res["OS"] in ["Windows", "Linux", "Darwin"], f"{res['OS']} is not supported"
     res["Package Manager"] = str(which_package_manager(res["OS"]))
-    typer.echo(json.dumps(res))
+    _json = json.dumps(res)
+    typer.echo(_json)
+    return _json
 
 
 if __name__ == "__main__":
