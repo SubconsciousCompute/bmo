@@ -1,6 +1,11 @@
-all :
+all : lint build
 
+
+build:
+	poetry install
+	poetry build 
 
 lint:
-	poetry run mypy bmo
+	poetry install
+	poetry run mypy --ignore-missing-imports bmo
 	poetry run pylint -E .
