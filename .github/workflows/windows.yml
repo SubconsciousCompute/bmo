@@ -15,5 +15,8 @@ jobs:
           python -m pip install poetry --upgrade
           python -m poetry install
           python -m poetry run mypy bmo 
-          python -m poetry run pylint -E .
+          python -m poetry run mypy tests
+          python -m poetry run pylint -E bmo
+          python -m poetry run pylint -E tests
+          python -m poetry run bmo --help
 
