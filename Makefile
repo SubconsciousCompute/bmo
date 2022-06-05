@@ -25,3 +25,8 @@ test:
 fix:
 	$(POETRY) run black bmo
 	$(POETRY) run black tests
+	
+bmo:
+	$(POETRY) run bmo $(arg1) $(arg2)
+
+.PHONY : bmo fix test install lint build all

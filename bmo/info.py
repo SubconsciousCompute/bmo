@@ -41,12 +41,12 @@ def which_package_manager(system: str) -> T.Optional[str]:
 
 
 @app.command()
-def info() -> str:
+def system() -> str:
     res: T.Dict[str, str] = {}
     res["OS"] = which_os()
     assert res["OS"] in ["Windows", "Linux", "Darwin"], f"{res['OS']} is not supported"
     res["Package Manager"] = str(which_package_manager(res["OS"]))
-    return json.dumps(res)
+    typer.echo(json.dumps(res))
 
 
 if __name__ == "__main__":

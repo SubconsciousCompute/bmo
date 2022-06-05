@@ -9,10 +9,13 @@ import typer
 
 # Local
 import bmo.network
+import bmo.doctor
+import bmo.info
 
 app = typer.Typer()
-app.add_typer(bmo.network.app, name="network")
 app.add_typer(bmo.doctor.app, name="doctor")
+app.add_typer(bmo.info.app, name="info")
+app.add_typer(bmo.network.app, name="network")
 
 
 @app.command()
