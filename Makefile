@@ -16,8 +16,7 @@ lint:
 install:
 	$(POETRY) install
 
-
-test:
+test: lint
 	$(POETRY) install
 	$(POETRY) run pytest tests
 	$(POETRY) run bmo --help
