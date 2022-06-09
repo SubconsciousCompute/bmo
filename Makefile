@@ -3,6 +3,9 @@ POETRY := $(PYTHON) -m poetry
 
 all : lint build
 
+bootstrap:
+	$(PYTHON) -m ensurepip
+	$(PYTHON) -m pip install poetry
 
 build:
 	$(POETRY) install
@@ -24,6 +27,10 @@ test: lint
 fix:
 	$(POETRY) run black bmo
 	$(POETRY) run black tests
+
+upload: build
+	$(PYTHON) -m pip install twine --user --upgrade
+	$(PYTHON) -m twine upload dist/*.whl --user __token__ --password $(PYPI_UPLOAD_TOKEN)
 
 bmo:
 	$(POETRY) run bmo $(arg1) $(arg2)

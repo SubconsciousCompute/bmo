@@ -21,3 +21,9 @@ jobs:
       - name: "Build and test"
         run: |
           bash ./.ci/build_and_test_linux.sh
+
+      - name: "Upload to pypi.org"
+        env:
+          PYPI_UPLOAD_TOKEN: ${{ secrets.PYPI_UPLOAD_TOKEN }}
+        run: |
+          make upload 
