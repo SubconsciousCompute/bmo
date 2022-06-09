@@ -2,7 +2,6 @@
 
 import datetime
 
-from scapy.all import sr1, srp, Ether, IP, ICMP, ARP
 
 from loguru import logger
 

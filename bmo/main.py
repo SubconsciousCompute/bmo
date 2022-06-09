@@ -7,15 +7,23 @@ from loguru import logger
 
 import typer
 
-# Local
-import bmo.network
-import bmo.doctor
-import bmo.info
-
 app = typer.Typer()
+
+# Local
+try:
+    import bmo.network
+except Exception as e:
+    logger.warn(f"Disabling command group 'network' because of {e}")
+    app.add_typer(bmo.network.app, name="network")
+
+import bmo.org
+app.add_typer(bmo.org.app, name="org")
+
+import bmo.doctor
 app.add_typer(bmo.doctor.app, name="doctor")
+
+import bmo.info
 app.add_typer(bmo.info.app, name="info")
-app.add_typer(bmo.network.app, name="network")
 
 
 @app.command()
