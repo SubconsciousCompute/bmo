@@ -9,12 +9,13 @@ import subprocess
 import typing as T
 from loguru import logger
 
+import bmo.common
+
 from pathlib import Path
 
 import typer
 
 app = typer.Typer()
-
 
 def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
     """Find a suitable linter in the current directory."""
@@ -27,22 +28,13 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
     return res
 
 
-def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> int:
-    """Run a given command"""
-    logger.info(f"Running `{cmd}` in {cwd}")
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, cwd=cwd)
-    assert proc is not None
-    for line in io.TextIOWrapper(proc.stdout, encoding="utf8"):  # type: ignore
-        typer.echo(f"> {line}")
-    return 0
-
 
 @app.command()
 def mypy(dir: Path = Path("src")):
     """Run mypy linter in given directory"""
     logger.info(f"Running mypy in {dir}")
     assert dir.exists(), "f{dir} doesn't exists"
-    assert 0 == run_command(
+    assert 0 == bmo.common.run_command(
         f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(dir)}"
     )
 
