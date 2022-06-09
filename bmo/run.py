@@ -57,7 +57,6 @@ def generate_gitignore(args: T.List[str] = [], force: bool = False):
         logger.warning(f"{cwd} is not a git repository?")
 
     gitignorefile = cwd / ".gitignore"
-    logger.info(f"Getting gitignore for {args}")
 
     if len(args) == 0:
         args = [determine_lang_tools(cwd).get("lang", "")]
@@ -65,18 +64,21 @@ def generate_gitignore(args: T.List[str] = [], force: bool = False):
     assert (
         len(args) > 0
     ), f"Could not automatically compute the API params.  Please pass using `--args` option."
-    endpoint = ",".join(args)
 
-    url = "https://www.toptal.com/developers/gitignore/api/"
-    res = requests.get(f"{url}/{endpoint}")
+    endpoint = ",".join(args)
+    url = f"https://www.toptal.com/developers/gitignore/api/{endpoint}"
+    logger.info(f"Fetching .gitignore content for {url}")
+
+    res = requests.get(f"{url}")
     if not gitignorefile.exists() or force:
         with gitignorefile.open("w") as f:
             f.write(res.text)
         return
-    logger.warning(
-        f"{gitignorefile} exists. Use `--force` to overwrite. I am going to write to stdout"
-    )
+
     typer.echo(res.text)
+    logger.warning(
+        f"{gitignorefile} exists. Use `--force` to overwrite. I am displaying the content of .gitignore to console."
+    )
 
 
 @app.command()
