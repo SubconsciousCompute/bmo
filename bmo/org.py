@@ -17,7 +17,7 @@ app = typer.Typer()
 
 
 @app.command()
-def backup(service: str, token: str = "", outdir: T.Optional[Path] = None) -> str:
+def backup(service: str, token: str = "", outdir: T.Optional[Path] = None):
     logger.info(f"backing up {service}")
     if service == "notion":
         from bmo.helpers.notion import Notion

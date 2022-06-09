@@ -13,7 +13,7 @@ app = typer.Typer()
 try:
     import bmo.network
 except Exception as e:
-    logger.warn(f"Disabling command group 'network' because of {e}")
+    logger.warning(f"Disabling command group 'network' because of {e}")
     app.add_typer(bmo.network.app, name="network")
 
 import bmo.org

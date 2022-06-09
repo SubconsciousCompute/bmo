@@ -1,4 +1,4 @@
-PYTHON := $(shell which python3)
+PYTHON := $(shell which python)
 POETRY := $(PYTHON) -m poetry
 
 all : lint build

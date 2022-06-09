@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
 set -x
-poetry install
+python -m pip install poetry --user --upgrade
+python -m poetry install
 make test
