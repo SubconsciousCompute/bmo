@@ -20,10 +20,14 @@ lint:
 install:
 	$(POETRY) install
 
-test: lint
+pre_test: lint
 	$(POETRY) install
-	$(POETRY) run pytest tests
 	$(POETRY) run bmo --help
+
+test: pre_test
+	$(POETRY) run pytest tests
+	$(POETRY) run bmo run lint
+	$(POETRY) run bmo run gi
 
 fix:
 	$(POETRY) run black bmo
