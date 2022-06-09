@@ -23,6 +23,7 @@ jobs:
           bash ./.ci/build_and_test_linux.sh
 
       - name: "Upload to pypi.org"
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           PYPI_UPLOAD_TOKEN: ${{ secrets.PYPI_UPLOAD_TOKEN }}
         run: |
