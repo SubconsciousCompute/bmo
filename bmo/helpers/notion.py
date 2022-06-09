@@ -32,7 +32,6 @@ class Notion:
         folder.mkdir(parents=True)
 
         logger.info(f"Creating backup into {folder}")
-
         # replace YOUR_INTEGRATION_TOKEN with your own secret token
         headers = {
             "Authorization": f"Bearer {self.token}",
@@ -41,6 +40,7 @@ class Notion:
         }
 
         response = requests.post("https://api.notion.com/v1/search", headers=headers)
+        logger.info(response.json())
         for block in response.json()["results"]:
             with open(f'{folder}/{block["id"]}.json', "w") as file:
                 file.write(json.dumps(block))
@@ -50,11 +50,10 @@ class Notion:
                 headers=headers,
             )
             if child_blocks.json()["results"]:
-                os.mkdir(folder + f'/{block["id"]}')
+                datadir = (folder / f'{block["id"]}') 
+                datadir.mkdir()
 
                 for child in child_blocks.json()["results"]:
-                    with open(
-                        f'{folder}/{block["id"]}/{child["id"]}.json', "w"
-                    ) as file:
+                    with open(datadir / f'{child["id"]}.json', "w") as file:
                         file.write(json.dumps(child))
         logger.info("backup is complete")
