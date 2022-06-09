@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bmo"
-version = "0.1.0"
+version = "0.2.0"
 description = "BMO automates stuff at SubCom"
 authors = ["Dilawar Singh <dilawar@subcom.tech>"]
 license = "GPLv3"
