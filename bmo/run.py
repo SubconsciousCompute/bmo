@@ -16,11 +16,15 @@ import typer
 app = typer.Typer()
 
 
-def determine_linter(dir: Path) -> str:
+def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
     """Find a suitable linter in the current directory."""
+    res = dict()
     if (dir / "pyproject.toml") or (dir / "setup.py"):
-        return "mypy"
-    return ""
+        res["lang"] = "python"
+        res["linter"] = "mypy"
+    else:
+        logger.warning("Failed to determine language and tooling.")
+    return res
 
 
 def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> int:
@@ -44,7 +48,7 @@ def mypy(dir: Path = Path("src")):
 
 
 @app.command("gi")
-def generate_gitignore(args: T.List[str], force: bool = False):
+def generate_gitignore(args: T.List[str] = [], force: bool = False):
     """Create gitignore file"""
     import requests
 
@@ -55,8 +59,15 @@ def generate_gitignore(args: T.List[str], force: bool = False):
     gitignorefile = cwd / ".gitignore"
     logger.info(f"Getting gitignore for {args}")
 
-    url = "https://www.toptal.com/developers/gitignore/api/"
+    if len(args) == 0:
+        args = [determine_lang_tools(cwd).get("lang", "")]
+
+    assert (
+        len(args) > 0
+    ), f"Could not automatically compute the API params.  Please pass using `--args` option."
     endpoint = ",".join(args)
+
+    url = "https://www.toptal.com/developers/gitignore/api/"
     res = requests.get(f"{url}/{endpoint}")
     if not gitignorefile.exists() or force:
         with gitignorefile.open("w") as f:
@@ -75,8 +86,8 @@ def lint(linter: str = "", dir: T.Optional[Path] = None):
         dir = Path.cwd()
 
     if not linter:
-        linter = determine_linter(dir)
-        logger.info(f"Automaticaly selecting linter {linter}")
+        linter = determine_lang_tools(dir).get("linter", "")
+        logger.info(f"Automaticaly selecting linter '{linter}'")
 
     if linter == "mypy":
         mypy(dir)
