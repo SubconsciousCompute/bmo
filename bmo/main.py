@@ -20,7 +20,7 @@ import bmo.org
 app.add_typer(bmo.org.app, name="org")
 
 import bmo.run
-app.add_typer(bmo.org.app, name="run")
+app.add_typer(bmo.run.app, name="run")
 
 import bmo.doctor
 app.add_typer(bmo.doctor.app, name="doctor")
