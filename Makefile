@@ -1,6 +1,8 @@
 PYTHON := $(shell which python)
 POETRY := $(PYTHON) -m poetry
 
+MYPY_OPTS:=--ignore-missing-imports --install-types --non-interactive
+
 all : lint build
 
 bootstrap:
@@ -13,8 +15,7 @@ build:
 
 lint:
 	$(POETRY) install
-	$(POETRY) run mypy --ignore-missing-imports bmo
-	# $(POETRY) run pylint -E bmo tests
+	$(POETRY) run mypy $(MYPY_OPTS) bmo
 
 install:
 	$(POETRY) install
