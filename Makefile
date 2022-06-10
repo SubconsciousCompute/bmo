@@ -40,4 +40,8 @@ upload: build
 bmo:
 	$(POETRY) run bmo $(arg1) $(arg2)
 
+upload: build
+	twine upload dist/bmo-*.whl
+
+
 .PHONY : bmo fix test install lint build all
