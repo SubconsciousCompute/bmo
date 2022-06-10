@@ -32,5 +32,10 @@ import bmo.cicd
 
 app.add_typer(bmo.cicd.app, name="cicd")
 
+import bmo.subcom
+
+app.add_typer(bmo.subcom.app, name="subcom")
+
+
 if __name__ == "__main__":
     app()
