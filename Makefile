@@ -13,21 +13,10 @@ build:
 	$(POETRY) install
 	$(POETRY) build
 
-lint:
-	$(POETRY) install
-	$(POETRY) run mypy $(MYPY_OPTS) bmo
-
 install:
 	$(POETRY) install
 
-pre_test: lint
-	$(POETRY) install
-	$(POETRY) run bmo --help
-
-test: pre_test
-	$(POETRY) run pytest tests
-	$(POETRY) run bmo run lint
-	$(POETRY) run bmo run gi
+## DevOps
 
 fix:
 	$(POETRY) run black bmo
@@ -37,11 +26,24 @@ upload: build
 	$(PYTHON) -m pip install twine --user --upgrade
 	$(PYTHON) -m twine upload dist/*.whl --user __token__ --password $(PYPI_UPLOAD_TOKEN)
 
-bmo:
-	$(POETRY) run bmo $(arg1) $(arg2)
+lint:
+	$(POETRY) install
+	$(POETRY) run mypy $(MYPY_OPTS) bmo
 
-upload: build
-	twine upload dist/bmo-*.whl
+## Tests
+
+test: test_cli test_module
+
+test_module: 
+	$(POETRY) install
+	$(POETRY) run bmo --help
+	$(POETRY) run pytest tests/*.py
+
+test_cli: test_module
+	$(POETRY) run bmo run lint
+	$(POETRY) run bmo run gi
+	$(POETRY) run bmo network check_ssl https://subcom.link
+
 
 
 .PHONY : bmo fix test install lint build all

@@ -1,13 +1,19 @@
-# Wifi module
+# network module
+__author__ = "Dilawar Singh"
 
+__email__ = "dilawar@subcom.tech"
+
+import re
 import datetime
-
+import requests
 
 from loguru import logger
 
 import typer
 
 app = typer.Typer()
+
+import bmo.common
 
 
 @app.command()
@@ -31,9 +37,20 @@ def speedtest():
 
 
 @app.command()
-def scan():
-    """Scanning the network"""
-    logger.info("Scanning local network")
-    ans, unans = srp(
-        Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst="192.168.1.0/24"), timeout=2
+def check_ssl(server: str, port: int = 443):
+    """Check SSL certificate of a given url."""
+    openssl = bmo.common.find_program("openssl")
+    assert openssl is not None
+    out = bmo.common.run_command(
+        f"{openssl} s_client -servername {server} -connect {server}:{port}",
+        silent=True,
     )
+
+    print(out)
+    bmo.common.search_pat(r"Verify return code:.+?\s", out)
+    typer.echo(re.search(r"Not Before:.+?\s", out, flags=re.IGNORECASE))
+    typer.echo(re.search(r"Not After:.+?\s", out, flags=re.IGNORECASE))
+
+
+if __name__ == "__main__":
+    app()

@@ -17,6 +17,7 @@ import typer
 
 app = typer.Typer()
 
+
 def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
     """Find a suitable linter in the current directory."""
     res = dict()
@@ -26,7 +27,6 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
     else:
         logger.warning("Failed to determine language and tooling.")
     return res
-
 
 
 @app.command()

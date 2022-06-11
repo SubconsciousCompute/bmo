@@ -50,7 +50,7 @@ class Notion:
                 headers=headers,
             )
             if child_blocks.json()["results"]:
-                datadir = (folder / f'{block["id"]}') 
+                datadir = folder / f'{block["id"]}'
                 datadir.mkdir()
 
                 for child in child_blocks.json()["results"]:
