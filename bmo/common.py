@@ -29,10 +29,20 @@ def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
         lines.append(line)
     return "".join(lines)
 
+
 def search_pat(pat, haystack) -> str:
     """Search for a pattern in haystack."""
     import re
+
     m = re.search(pat, haystack, flags=re.IGNORECASE)
     if m is not None:
         return m.group(0)
-    return ''
+    return ""
+
+
+def success(msg: str):
+    typer.echo(f"👍 {msg}")
+
+
+def failure(msg: str):
+    typer.echo(f"👎 {msg}")

@@ -46,10 +46,9 @@ def check_ssl(server: str, port: int = 443):
         silent=True,
     )
 
-    print(out)
-    bmo.common.search_pat(r"Verify return code:.+?\s", out)
-    typer.echo(re.search(r"Not Before:.+?\s", out, flags=re.IGNORECASE))
-    typer.echo(re.search(r"Not After:.+?\s", out, flags=re.IGNORECASE))
+    vrc = bmo.common.search_pat(r"Verify return code:.+?\s", out)
+    assert vrc, f"Verification failed."
+    bmo.common.success("Verification of Certification passed.")
 
 
 if __name__ == "__main__":
