@@ -42,8 +42,9 @@ def check_ssl(server: str, port: int = 443):
     openssl = bmo.common.find_program("openssl")
     assert openssl is not None
     out = bmo.common.run_command(
-        f"{openssl} s_client -servername {server} -connect {server}:{port}",
+        f"{openssl} s_client -servername {server} -connect {server}:{port} | {openssl} x509 -noout -dates",
         silent=True,
+        shell=True,
     )
 
     vrc = bmo.common.search_pat(r"Verify return code:.+?\s", out)

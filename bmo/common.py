@@ -17,10 +17,12 @@ def find_program(prg: str):
     return shutil.which(prg)
 
 
-def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
+def run_command_pipe(
+    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
+) -> str:
     """Run a given command"""
     logger.info(f"Running `{cmd}` in {cwd}")
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, cwd=cwd)
+    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, cwd=cwd, shell=shell)
     assert proc is not None
     lines = []
     for line in io.TextIOWrapper(proc.stdout, encoding="utf8"):  # type: ignore
@@ -28,6 +30,17 @@ def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
             typer.echo(f"> {line}")
         lines.append(line)
     return "".join(lines)
+
+
+def run_command(
+    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
+) -> str:
+    """Run a given command"""
+    logger.info(f"Running `{cmd}` in {cwd}")
+    output = subprocess.check_output(cmd.split(), stdout=subprocess.PIPE, cwd=cwd, shell=shell)
+    if not silent:
+        typer.echo(f"> {output}")
+    return output
 
 
 def search_pat(pat, haystack) -> str:
