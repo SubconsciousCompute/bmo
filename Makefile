@@ -33,6 +33,9 @@ fix:
 	$(POETRY) run black bmo
 	$(POETRY) run black tests
 
+doc docs:
+	poetry run mkdocs build
+
 upload: build
 	$(PYTHON) -m pip install twine --user --upgrade
 	$(PYTHON) -m twine upload dist/*.whl --user __token__ --password $(PYPI_UPLOAD_TOKEN)
@@ -40,8 +43,6 @@ upload: build
 bmo:
 	$(POETRY) run bmo $(arg1) $(arg2)
 
-upload: build
-	twine upload dist/bmo-*.whl
 
 
-.PHONY : bmo fix test install lint build all
+.PHONY : bmo fix test install lint build all doc docs

@@ -29,6 +29,10 @@ jobs:
         run: |
           make upload 
 
+      - name: Build docs
+        run: |
+          poetry run mkdocs buils
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
