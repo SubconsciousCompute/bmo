@@ -11,6 +11,25 @@ from loguru import logger
 
 import typer
 
+def system() -> T.Tuple[str, str]:
+    return (platform.system(), sys.platform)
+
+
+def is_windows(cygwin_is_windows: bool = True) -> bool:
+    """Check if we are running on windows.
+
+    Parameters
+    ----------
+        cygwin_is_windows : (default `True`). When set to `True`, consider cygwin as Windows.
+
+    Returns
+    -------
+    `True` if on Windows, `False` otherwise.
+    """
+    _sys = system()
+    if _sys[0].startswith("windows"):
+        return True
+    return cygwin_is_windows and _sys[1] == "cygwin"
 
 def find_program(prg: str):
     """where is a given binary"""
