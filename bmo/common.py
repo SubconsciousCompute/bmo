@@ -2,8 +2,11 @@ __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
 import io
+import sys
 import subprocess
 import shutil
+import platform
+
 import typing as T
 
 from pathlib import Path
@@ -42,7 +45,7 @@ def run_command_pipe(
 ) -> str:
     """Run a given command"""
     logger.info(f"Running `{cmd}` in {cwd}")
-    proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, cwd=cwd, shell=shell)
+    proc = subprocess.Popen(cmd.split(), cwd=cwd, shell=shell, text=True)
     assert proc is not None
     lines = []
     for line in io.TextIOWrapper(proc.stdout, encoding="utf8"):  # type: ignore
@@ -57,7 +60,7 @@ def run_command(
 ) -> str:
     """Run a given command"""
     logger.info(f"Running `{cmd}` in {cwd}")
-    output = subprocess.check_output(cmd.split(), stdout=subprocess.PIPE, cwd=cwd, shell=shell)
+    output = subprocess.check_output(cmd.split(), cwd=cwd, shell=shell, text=True)
     if not silent:
         typer.echo(f"> {output}")
     return output
