@@ -34,7 +34,7 @@ def run_gitlab_runner(command: str = "", job: str = "build"):
     if not command:
         command = "docker" if find_docker() is not None else "shell"
     job = job if job else "build"
-    assert 0 == bmo.common.run_command(f"gitlab-runner exec {command} {job}")
+    bmo.common.run_command(f"gitlab-runner exec {command} {job}")
 
 
 if __name__ == "__main__":

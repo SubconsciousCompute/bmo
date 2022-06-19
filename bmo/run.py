@@ -34,7 +34,7 @@ def mypy(dir: Path = Path("src")):
     """Run mypy linter in given directory"""
     logger.info(f"Running mypy in {dir}")
     assert dir.exists(), "f{dir} doesn't exists"
-    assert 0 == bmo.common.run_command(
+    bmo.common.run_command(
         f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(dir)}"
     )
 

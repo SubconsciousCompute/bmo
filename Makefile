@@ -42,7 +42,7 @@ test_module:
 test_cli: test_module
 	$(POETRY) run bmo run lint
 	$(POETRY) run bmo run gi
-	$(POETRY) run bmo network check_ssl https://subcom.link
+	$(POETRY) run bmo network check-ssl https://subcom.link
 
 
 

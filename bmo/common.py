@@ -1,3 +1,6 @@
+"""Common utilities.
+"""
+
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
@@ -14,6 +17,7 @@ from pathlib import Path
 from loguru import logger
 
 import typer
+
 
 def system() -> T.Tuple[str, str]:
     return (platform.system(), sys.platform)
@@ -35,6 +39,7 @@ def is_windows(cygwin_is_windows: bool = True) -> bool:
         return True
     return cygwin_is_windows and _sys[1] == "cygwin"
 
+
 def find_program(prg: str):
     """where is a given binary"""
     return shutil.which(prg)
@@ -55,25 +60,20 @@ def run_command_pipe(
     return "".join(lines)
 
 
-def run_command(
-    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
-) -> str:
+def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
     """Run a given command"""
     logger.info(f"Running `{cmd}` in {cwd}")
-    output = subprocess.check_output(cmd.split(), cwd=cwd, shell=shell, text=True)
+    p = subprocess.run(cmd.split(), cwd=cwd, capture_output=True, check=True, text=True)
+    output = p.stdout + p.stderr
     if not silent:
         typer.echo(f"> {output}")
     return output
 
 
-def search_pat(pat, haystack) -> str:
+def search_pat(pat, haystack):
     """Search for a pattern in haystack."""
     import re
-
-    m = re.search(pat, haystack, flags=re.IGNORECASE)
-    if m is not None:
-        return m.group(0)
-    return ""
+    return re.search(pat, haystack, flags=re.IGNORECASE)
 
 
 def success(msg: str):
