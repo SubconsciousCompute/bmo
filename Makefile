@@ -13,9 +13,6 @@ build:
 	$(POETRY) install
 	$(POETRY) build
 
-install:
-	$(POETRY) install
-
 ## DevOps
 
 fix:
@@ -26,15 +23,18 @@ upload: build
 	$(PYTHON) -m pip install twine --user --upgrade
 	$(PYTHON) -m twine upload dist/*.whl --user __token__ --password $(PYPI_UPLOAD_TOKEN)
 
-lint:
+lint check:
 	$(POETRY) install
 	$(POETRY) run mypy $(MYPY_OPTS) bmo
+
+install:
+	$(PYTHON) -m pip install .
 
 ## Tests
 
 test: test_cli test_module
 
-test_module: 
+test_module:
 	$(POETRY) install
 	$(POETRY) run bmo --help
 	$(POETRY) run pytest tests/*.py
