@@ -37,7 +37,7 @@ def run_command(
 ) -> str:
     """Run a given command"""
     logger.info(f"Running `{cmd}` in {cwd}")
-    p = subprocess.run(cmd.split(), cwd=cwd, text=True, check=True, capture_output=True)
+    p = subprocess.run(cmd.split(), cwd=cwd, text=True, capture_output=True)
     output = p.stdout + p.stderr
     if not silent:
         typer.echo(f"> {output}")

@@ -30,12 +30,12 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
 
 
 @app.command()
-def mypy(dir: Path = Path("src")):
+def mypy(sdir: Path = Path("src")):
     """Run mypy linter in given directory"""
-    logger.info(f"Running mypy in {dir}")
-    assert dir.exists(), "f{dir} doesn't exists"
-    assert 0 == bmo.common.run_command(
-        f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(dir)}"
+    logger.info(f"Running mypy in {sdir}")
+    assert sdir.exists(), "f{sdir} doesn't exists"
+    bmo.common.run_command(
+        f"poetry run mypy --ignore-missing-imports --install-types --non-interactive {str(sdir)}"
     )
 
 
