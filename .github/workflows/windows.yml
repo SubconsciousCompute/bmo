@@ -10,4 +10,5 @@ jobs:
 
       - name : "Build and test"
         run: |
-          powershell.exe -F ./.ci/build_and_test_windows.ps1
+          choco install -y make
+          make ci
