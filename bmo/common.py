@@ -91,12 +91,13 @@ def run_command(
         for line in iter(p.stdout.readline, ""):
             if line is None:
                 break
+            line = line.rstrip()
             lines.append(f"> {line}")
             if stream and not silent:
                 typer.echo(f"> {line}")
 
-    output = "".join(lines)
-    if not silent:
+    output = "\n".join(lines)
+    if not silent and not stream:
         typer.echo(f"> {output}")
     return output
 
