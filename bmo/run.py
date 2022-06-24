@@ -3,6 +3,7 @@ __email__ = "dilawar@subcom.tech"
 
 import logging
 import typing as T
+import sys
 from pathlib import Path
 
 import bmo.common
@@ -26,10 +27,10 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
 @app.command()
 def mypy(sdir: Path = Path("src")):
     """Run mypy linter in given directory"""
-    logger.info(f"Running mypy in {dir}")
-    assert dir.exists(), "f{dir} doesn't exists"
+    logging.info(f"Running mypy in {sdir}")
+    assert sdir.exists(), "f{sdir} doesn't exists"
     bmo.common.run_command(
-        f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(dir)}"
+        f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(sdir)}"
     )
 
 
@@ -79,9 +80,3 @@ def lint(linter: str = "", dir: T.Optional[Path] = None):
 
     if linter == "mypy":
         mypy(dir)
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

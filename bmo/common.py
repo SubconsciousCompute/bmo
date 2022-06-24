@@ -6,6 +6,9 @@ import sys
 import subprocess
 import shutil
 import logging
+import platform
+
+import typing as T
 
 from pathlib import Path
 
@@ -66,6 +69,7 @@ def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
 def search_pat(pat, haystack):
     """Search for a pattern in haystack."""
     import re
+
     return re.search(pat, haystack, flags=re.IGNORECASE)
 
 

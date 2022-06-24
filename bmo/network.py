@@ -2,11 +2,12 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-import re
-import datetime
-import requests
-
 import logging
+import subprocess
+from urllib.parse import urlparse
+
+import dateutil.parser
+import dateutil.util
 
 import typer
 
@@ -17,6 +18,7 @@ import bmo.common
 
 def parse_x509_date(datestr: str):
     return dateutil.parser.parse(datestr)
+
 
 @app.command()
 def speedtest():
@@ -43,7 +45,7 @@ def check_ssl(server: str, port: int = 443):
     """Check SSL certificate of a given url."""
     if not server.startswith("https"):
         server = f"https://{server}"
-    logger.info(f"Checking certificate for {server}")
+    logging.info(f"Checking certificate for {server}")
     openssl = bmo.common.find_program("openssl")
     assert openssl is not None
     domain = urlparse(server).netloc
