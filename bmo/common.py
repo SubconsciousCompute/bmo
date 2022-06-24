@@ -84,8 +84,8 @@ def search_pat(pat, haystack):
 
 
 def success(msg: str):
-    typer.echo(f"👍 {msg}")
+    typer.echo(f":) {msg}")
 
 
 def failure(msg: str):
-    typer.echo(f"👎 {msg}")
+    typer.echo(f":( {msg}")
