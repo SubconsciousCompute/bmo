@@ -6,6 +6,7 @@ import typer
 app = typer.Typer()
 
 import bmo.network
+
 app.add_typer(bmo.network.app, name="network")
 
 import bmo.org

@@ -13,6 +13,8 @@ import typing as T
 
 from pathlib import Path
 
+import bmo.common
+
 import typer
 
 
@@ -38,7 +40,7 @@ def is_windows(cygwin_is_windows: bool = True) -> bool:
 
 
 def find_program(
-    name: str, hints: list[T.Union[Path,str]] = [], recursive: bool = False
+    name: str, hints: list[T.Union[Path, str]] = [], recursive: bool = False
 ) -> T.Optional[str]:
     """where is a given binary"""
     for hint in hints:
@@ -51,27 +53,51 @@ def find_program(
     return shutil.which(name)
 
 
-def run_command_pipe(
-    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
+def run_command(
+    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, stream: bool = True
 ) -> str:
-    """Run a given command"""
-    logging.info(f"Running `{cmd}` in {cwd}")
-    proc = subprocess.Popen(cmd.split(), cwd=cwd, shell=shell, text=True)
-    assert proc is not None
+    """Run a given command.
+
+    Parameters
+    ----------
+    cmd : str
+        cmd
+    cwd : Path
+        Current working directory.
+    silent : bool
+        If `True`, output is not printed onto console.
+    stream : bool
+        If `True` the output is printed line by line eagerly (as soon as a line is available)
+        rather than all at once.
+
+    Returns
+    -------
+    str
+
+    Credits
+    --------
+    1. https://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
+    """
+    logging.debug(f"Running `{cmd}` in {cwd}")
+    p = subprocess.Popen(
+        cmd.split(),
+        cwd=cwd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     lines = []
-    for line in io.TextIOWrapper(proc.stdout, encoding="utf8"):  # type: ignore
-        if not silent:
-            typer.echo(f"> {line}")
-        lines.append(line)
-    return "".join(lines)
+    if p.stdout is not None:
+        for line in iter(p.stdout.readline, ""):
+            if line is None:
+                break
+            line = line.rstrip()
+            lines.append(f"> {line}")
+            if stream and not silent:
+                typer.echo(f"> {line}")
 
-
-def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
-    """Run a given command"""
-    logging.info(f"Running `{cmd}` in {cwd}")
-    p = subprocess.run(cmd.split(), cwd=cwd, capture_output=True, check=True, text=True)
-    output = p.stdout + p.stderr
-    if not silent:
+    output = "\n".join(lines)
+    if not silent and not stream:
         typer.echo(f"> {output}")
     return output
 
@@ -89,3 +115,18 @@ def success(msg: str):
 
 def failure(msg: str):
     typer.echo(f":( {msg}")
+
+
+def _test_run_command_linux():
+    out = run_command("ls")
+    out = run_command("ls -ltrh")
+
+
+def test_common():
+    if bmo.common.is_windows():
+        return
+    _test_run_command_linux()
+
+
+if __name__ == "__main__":
+    test_common()

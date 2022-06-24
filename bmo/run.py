@@ -80,3 +80,7 @@ def lint(linter: str = "", dir: T.Optional[Path] = None):
 
     if linter == "mypy":
         mypy(dir)
+
+
+if __name__ == "__main__":
+    app()

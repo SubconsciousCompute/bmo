@@ -69,8 +69,8 @@ def test_download_only():
     assert len(text) > 0
     assert "downloads.docker.com" in text
     assert "node_exporter" in text
-    print(text)
 
 
 if __name__ == "__main__":
-    test_download_only()
+    app()
+
