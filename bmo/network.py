@@ -7,7 +7,7 @@ import re
 import datetime
 import requests
 
-from loguru import logger
+import logging
 
 import typer
 
@@ -20,7 +20,7 @@ import bmo.common
 def speedtest():
     import speedtest as _st
 
-    logger.info("Running speedtest")
+    logging.info("Running speedtest")
     s = _st.Speedtest()
     s.get_servers([])
     s.get_best_server()
@@ -29,7 +29,7 @@ def speedtest():
     try:
         s.results.share()
     except Exception as e:
-        pass
+        logging.warn(f"{e}")
     res = s.results.dict()
     res["download"] = res["download"] / 1024 / 1024
     res["upload"] = res["download"] / 1024 / 1024
@@ -44,7 +44,6 @@ def check_ssl(server: str, port: int = 443):
     out = bmo.common.run_command(
         f"{openssl} s_client -servername {server} -connect {server}:{port} | {openssl} x509 -noout -dates",
         silent=True,
-        shell=True,
     )
 
     vrc = bmo.common.search_pat(r"Verify return code:.+?\s", out)

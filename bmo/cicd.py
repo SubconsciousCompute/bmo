@@ -1,28 +1,17 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-import sys
-import json
-import platform
-
-import typing as T
+import shutil
+import bmo.common
 
 from pathlib import Path
 
-from loguru import logger
-
-import bmo.common
-
 import typer
-
-
 app = typer.Typer()
 
 
 def find_docker():
-    import shutils
-
-    return shutils.which("docker")
+    return shutil.which("docker")
 
 
 @app.command("runner")

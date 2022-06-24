@@ -4,10 +4,9 @@ __email__ = "dilawar@subcom.tech"
 import io
 import subprocess
 import shutil
+import logging
 
 from pathlib import Path
-
-from loguru import logger
 
 import typer
 
@@ -21,7 +20,7 @@ def run_command_pipe(
     cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
 ) -> str:
     """Run a given command"""
-    logger.info(f"Running `{cmd}` in {cwd}")
+    logging.info(f"Running `{cmd}` in {cwd}")
     proc = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, cwd=cwd, shell=shell)
     assert proc is not None
     lines = []
@@ -32,11 +31,9 @@ def run_command_pipe(
     return "".join(lines)
 
 
-def run_command(
-    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
-) -> str:
+def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
     """Run a given command"""
-    logger.info(f"Running `{cmd}` in {cwd}")
+    logging.info(f"Running `{cmd}` in {cwd}")
     p = subprocess.run(cmd.split(), cwd=cwd, text=True, capture_output=True)
     output = p.stdout + p.stderr
     if not silent:

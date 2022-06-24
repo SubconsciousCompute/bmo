@@ -1,10 +1,6 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-from typing import Optional
-
-from loguru import logger
-
 import typer
 
 app = typer.Typer()

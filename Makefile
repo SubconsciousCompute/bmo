@@ -23,9 +23,14 @@ upload: build
 	$(PYTHON) -m pip install twine --user --upgrade
 	$(PYTHON) -m twine upload dist/*.whl --user __token__ --password $(PYPI_UPLOAD_TOKEN)
 
-lint check:
+check: mypy lint
+
+mypy:
 	$(POETRY) install
 	$(POETRY) run mypy $(MYPY_OPTS) bmo
+
+lint:
+	$(POETRY) run pylint -E bmo
 
 install:
 	$(PYTHON) -m pip install .
@@ -46,4 +51,4 @@ test_cli: test_module
 
 
 
-.PHONY : bmo fix test install lint build all
+.PHONY : bmo fix test install lint build all mypy check
