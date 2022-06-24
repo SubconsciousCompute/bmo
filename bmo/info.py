@@ -8,11 +8,9 @@ import sys
 import json
 import platform
 import typing as T
-
-from loguru import logger
+import logging
 
 import typer
-
 app = typer.Typer()
 
 
@@ -37,7 +35,7 @@ def get_like_distro() -> T.List[str]:
 
 
 def which_package_manager(system: str) -> T.Optional[str]:
-    logger.warning("Not implemented yet")
+    logging.warning("Not implemented yet")
     return None
 
 

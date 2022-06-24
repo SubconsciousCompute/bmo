@@ -1,17 +1,12 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-
-import sys
-import io
-import subprocess
-
+import logging
 import typing as T
-from loguru import logger
+import sys
+from pathlib import Path
 
 import bmo.common
-
-from pathlib import Path
 
 import typer
 
@@ -25,17 +20,17 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
         res["lang"] = "python"
         res["linter"] = "mypy"
     else:
-        logger.warning("Failed to determine language and tooling.")
+        logging.warning("Failed to determine language and tooling.")
     return res
 
 
 @app.command()
 def mypy(sdir: Path = Path("src")):
     """Run mypy linter in given directory"""
-    logger.info(f"Running mypy in {sdir}")
+    logging.info(f"Running mypy in {sdir}")
     assert sdir.exists(), "f{sdir} doesn't exists"
     bmo.common.run_command(
-        f"poetry run mypy --ignore-missing-imports --install-types --non-interactive {str(sdir)}"
+        f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(sdir)}"
     )
 
 
@@ -46,7 +41,7 @@ def generate_gitignore(args: T.List[str] = [], force: bool = False):
 
     cwd = Path.cwd().resolve()
     if not (cwd / ".git").exists():
-        logger.warning(f"{cwd} is not a git repository?")
+        logging.warning(f"{cwd} is not a git repository?")
 
     gitignorefile = cwd / ".gitignore"
 
@@ -59,7 +54,7 @@ def generate_gitignore(args: T.List[str] = [], force: bool = False):
 
     endpoint = ",".join(args)
     url = f"https://www.toptal.com/developers/gitignore/api/{endpoint}"
-    logger.info(f"Fetching .gitignore content for {url}")
+    logging.info(f"Fetching .gitignore content for {url}")
 
     res = requests.get(f"{url}")
     if not gitignorefile.exists() or force:
@@ -68,7 +63,7 @@ def generate_gitignore(args: T.List[str] = [], force: bool = False):
         return
 
     typer.echo(res.text)
-    logger.warning(
+    logging.warning(
         f"{gitignorefile} exists. Use `--force` to overwrite. I am displaying the content of .gitignore to console."
     )
 
@@ -81,13 +76,7 @@ def lint(linter: str = "", dir: T.Optional[Path] = None):
 
     if not linter:
         linter = determine_lang_tools(dir).get("linter", "")
-        logger.info(f"Automaticaly selecting linter '{linter}'")
+        logging.info(f"Automaticaly selecting linter '{linter}'")
 
     if linter == "mypy":
         mypy(dir)
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()

@@ -1,10 +1,6 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-from typing import Optional
-
-from loguru import logger
-
 import typer
 
 app = typer.Typer()
@@ -31,6 +27,11 @@ app.add_typer(bmo.info.app, name="info")
 import bmo.cicd
 
 app.add_typer(bmo.cicd.app, name="cicd")
+
+import bmo.subcom
+
+app.add_typer(bmo.subcom.app, name="subcom")
+
 
 if __name__ == "__main__":
     app()
