@@ -30,10 +30,10 @@ check: mypy lint
 
 mypy:
 	$(POETRY) install
-	$(POETRY) run mypy $(MYPY_OPTS) bmo
+	$(POETRY) run mypy $(MYPY_OPTS) bmo tests
 
 lint:
-	$(POETRY) run pylint -E bmo
+	$(POETRY) run pylint -E bmo tests
 
 install:
 	$(PYTHON) -m pip install .
