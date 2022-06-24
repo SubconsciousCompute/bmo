@@ -39,7 +39,6 @@ install:
 	$(PYTHON) -m pip install .
 
 ## Tests
-
 test: test_cli test_module
 
 test_module:
@@ -53,5 +52,9 @@ test_cli: test_module
 	$(POETRY) run bmo network check_ssl https://subcom.link
 
 
+# CICD pipeline
+ci:
+	$(MAKE) check
+	$(MAKE) test
 
-.PHONY : bmo fix test install lint build all mypy check
+.PHONY : bmo fix test install lint build all mypy check ci

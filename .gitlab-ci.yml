@@ -1,0 +1,13 @@
+image: python:3.9-slim-buster
+
+before_script:
+  - apt update
+  - apt install -y gcc make
+  - python -m pip install poetry
+
+build:
+  stage: build
+  tags:
+    - linux
+  script:
+    - make ci
