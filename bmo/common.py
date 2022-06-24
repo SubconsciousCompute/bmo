@@ -13,6 +13,8 @@ import typing as T
 
 from pathlib import Path
 
+import bmo.common
+
 import typer
 
 
@@ -51,21 +53,6 @@ def find_program(
     return shutil.which(name)
 
 
-def run_command_pipe(
-    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, shell: bool = False
-) -> str:
-    """Run a given command"""
-    logging.info(f"Running `{cmd}` in {cwd}")
-    proc = subprocess.Popen(cmd.split(), cwd=cwd, shell=shell, text=True)
-    assert proc is not None
-    lines = []
-    for line in io.TextIOWrapper(proc.stdout, encoding="utf8"):  # type: ignore
-        if not silent:
-            typer.echo(f"> {line}")
-        lines.append(line)
-    return "".join(lines)
-
-
 def run_command(
     cmd: str, cwd: Path = Path.cwd(), silent: bool = False, stream: bool = True
 ) -> str:
@@ -94,10 +81,10 @@ def run_command(
     logging.debug(f"Running `{cmd}` in {cwd}")
     p = subprocess.Popen(
         cmd.split(),
-        cwd=str(cwd),
+        cwd=cwd,
         text=True,
-        stdout=subprocess.STDOUT,
-        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     lines = []
     if p.stdout is not None:
@@ -108,7 +95,7 @@ def run_command(
             if stream and not silent:
                 typer.echo(f"> {line}")
 
-    output = "\n".join(lines)
+    output = "".join(lines)
     if not silent:
         typer.echo(f"> {output}")
     return output
@@ -127,3 +114,18 @@ def success(msg: str):
 
 def failure(msg: str):
     typer.echo(f":( {msg}")
+
+
+def _test_run_command_linux():
+    out = run_command("ls")
+    out = run_command("ls -ltrh")
+
+
+def test_common():
+    if bmo.common.is_windows():
+        return
+    _test_run_command_linux()
+
+
+if __name__ == "__main__":
+    test_common()
