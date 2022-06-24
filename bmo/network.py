@@ -47,7 +47,7 @@ def check_ssl(server: str, port: int = 443):
     )
 
     vrc = bmo.common.search_pat(r"Verify return code:.+?\s", out)
-    assert vrc, f"Verification failed."
+    assert vrc, f"Verification failed. {out}"
     bmo.common.success("Verification of Certification passed.")
 
 
