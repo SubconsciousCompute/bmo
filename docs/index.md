@@ -1,4 +1,10 @@
 # Welcome to BMO
 
-::: bmo
+::: bmo.main
+
+::: bmo.common
+
+::: bmo.subcom
+
+
 

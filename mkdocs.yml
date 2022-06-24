@@ -1,10 +1,19 @@
 site_name: BMO
 
 theme:
-  name: "material"
+  name: "readthedocs"
 
 plugins:
   - search
-  - mkdocstring
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_command:
+            - import sys
+            - sys.path.append('../')
+            - python -c "import bmo"
+          selection:
+            new_path_syntax: true
 
 

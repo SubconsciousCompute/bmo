@@ -59,4 +59,9 @@ ci:
 	$(MAKE) check
 	$(MAKE) test
 
-.PHONY : bmo fix test install lint build all mypy check ci
+docs doc:
+	$(PYTHON) -m pip install -r docs/requirements.txt
+	mkdocs build
+
+
+.PHONY : bmo fix test install lint build all mypy check ci docs doc
