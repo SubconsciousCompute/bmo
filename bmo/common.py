@@ -38,7 +38,7 @@ def is_windows(cygwin_is_windows: bool = True) -> bool:
 
 
 def find_program(
-    name: str, hints: list[T.Union[Path,str]] = [], recursive: bool = False
+    name: str, hints: list[T.Union[Path, str]] = [], recursive: bool = False
 ) -> T.Optional[str]:
     """where is a given binary"""
     for hint in hints:
@@ -66,11 +66,49 @@ def run_command_pipe(
     return "".join(lines)
 
 
-def run_command(cmd: str, cwd: Path = Path.cwd(), silent: bool = False) -> str:
-    """Run a given command"""
-    logging.info(f"Running `{cmd}` in {cwd}")
-    p = subprocess.run(cmd.split(), cwd=cwd, capture_output=True, check=True, text=True)
-    output = p.stdout + p.stderr
+def run_command(
+    cmd: str, cwd: Path = Path.cwd(), silent: bool = False, stream: bool = True
+) -> str:
+    """Run a given command.
+
+    Parameters
+    ----------
+    cmd : str
+        cmd
+    cwd : Path
+        Current working directory.
+    silent : bool
+        If `True`, output is not printed onto console.
+    stream : bool
+        If `True` the output is printed line by line eagerly (as soon as a line is available)
+        rather than all at once.
+
+    Returns
+    -------
+    str
+
+    Credits
+    --------
+    1. https://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
+    """
+    logging.debug(f"Running `{cmd}` in {cwd}")
+    p = subprocess.Popen(
+        cmd.split(),
+        cwd=str(cwd),
+        text=True,
+        stdout=subprocess.STDOUT,
+        stderr=subprocess.STDOUT,
+    )
+    lines = []
+    if p.stdout is not None:
+        for line in iter(p.stdout.readline, ""):
+            if line is None:
+                break
+            lines.append(f"> {line}")
+            if stream and not silent:
+                typer.echo(f"> {line}")
+
+    output = "\n".join(lines)
     if not silent:
         typer.echo(f"> {output}")
     return output
