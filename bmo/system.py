@@ -5,15 +5,12 @@ Command module.
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-import subprocess
 import shutil
 import itertools
-import functools
 import typing as T
+import logging
 
 from pathlib import Path
-
-from loguru import logger
 
 
 def find(
@@ -56,9 +53,9 @@ def find(
     subdirs.append(".")
     for hint, subdir in itertools.product(hints, subdirs):
         e = Path(hint) / subdir
-        logger.debug(f" Searching for {cmd} in {str(e)}")
+        logging.debug(f" Searching for {cmd} in {str(e)}")
         if not e.exists():
-            logger.warning(f" Location '{str(e)}' doesn't exist. Ignoring...")
+            logging.warning(f" Location '{str(e)}' doesn't exist. Ignoring...")
             continue
 
         if e.is_file() and (e.name == cmd or e.name == winname):
@@ -68,7 +65,7 @@ def find(
             if fs := list(e.glob(f"**/{cmd}")) + list(e.glob(f"**/{winname}")):
                 if fs:
                     if len(fs) > 1:
-                        logger.warning(
+                        logging.warning(
                             "Multiple binaries found with same name: \n\t"
                             + "\n\t".join(map(str, fs))
                             + ".\nReturning the first one."
@@ -85,7 +82,7 @@ def cmake() -> Path:
     """get cmake path"""
     cmake = find("cmake")
     if cmake is None or not cmake.is_file():
-        logger.warning("cmake.exe is not found")
+        logging.warning("cmake.exe is not found")
         raise Exception("cmake not found")
     return cmake
 

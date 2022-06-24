@@ -5,6 +5,7 @@ import io
 import sys
 import subprocess
 import shutil
+import glob
 import logging
 import platform
 
@@ -36,9 +37,18 @@ def is_windows(cygwin_is_windows: bool = True) -> bool:
     return cygwin_is_windows and _sys[1] == "cygwin"
 
 
-def find_program(prg: str):
+def find_program(
+    name: str, hints: list[T.Union[Path,str]] = [], recursive: bool = False
+) -> T.Optional[str]:
     """where is a given binary"""
-    return shutil.which(prg)
+    for hint in hints:
+        hint = Path(hint).resolve()
+        if not hint.exists():
+            continue
+        for p in glob.glob(f"{hint}/**/{name}", recursive=recursive):
+            if (prg := shutil.which(p)) is not None:
+                return prg
+    return shutil.which(name)
 
 
 def run_command_pipe(

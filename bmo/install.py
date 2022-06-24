@@ -1,23 +1,21 @@
 __author__ = "Dilawar Singh"
-__email__ = "dilawar@subcom.tech"
+__email__ = "dilawar@bmo.tech"
 
 import subprocess
 import platform
 import tempfile
 import shutil
+import logging
 
 from pathlib import Path
 
-from loguru import logger
 
-import subcom.common
-import subcom.command
-
+import bmo.common
 
 def _get_manager_opts() -> list[str]:
-    if subcom.common.is_windows():
-        _choco = subcom.command.find("choco")
-        assert _choco is not None and _choco.exists()
+    if bmo.common.is_windows():
+        _choco = bmo.common.find_program("choco")
+        assert _choco is not None and Path(_choco).exists()
         return ["-m", "choco"]
     return []
 
@@ -30,13 +28,13 @@ def install_pkg(dep: str, extra: list[str] = []):
 
 def ensure_choco() -> Path:
     """Ensure that choco.exe exists on system"""
-    if not subcom.common.is_windows():
+    if not bmo.common.is_windows():
         raise RuntimeError(
             f"choco.exe is available only on Windows. This system is {platform.system()}"
         )
 
     if choco := shutil.which("choco.exe"):
-        logger.info(f"choco.exe is already installed: {choco}")
+        logging.info(f"choco.exe is already installed: {choco}")
         return Path(choco)
 
     with tempfile.TemporaryFile(prefix="choco.ps1") as tmp:
@@ -44,9 +42,9 @@ def ensure_choco() -> Path:
         tmp.write(ps_str)
         subprocess.check_output(["powershell.exe", tmp.name])
 
-    chocopath = subcom.command.find("choco.exe")
+    chocopath = bmo.common.find_program("choco.exe")
     if chocopath is None:
-        logger.warning("choco.exe is not found")
+        logging.warning("choco.exe is not found")
         raise RuntimeError("could not locate choco.exe")
 
     return Path(chocopath)
@@ -60,32 +58,32 @@ def ensure_visual_studio(
     pkg: str = "visualstudio2019community", trial_left: int = 1
 ) -> Path:
     """Ensure that Visual Studio 2019 is installed and returns the path to msbuid.exe"""
-    msbuild = subcom.command.find(
+    msbuild = bmo.common.find_program(
         "msbuild.exe",
         hints=["C:/Program Files (x86)/Microsoft Visual Studio"],
         recursive=True,
     )
 
     if msbuild is None and trial_left > 0:
-        logger.info(f"Trying to install {pkg} {trial_left=}")
+        logging.info(f"Trying to install {pkg} {trial_left=}")
         install_pkg(pkg)
         ensure_visual_studio(trial_left=trial_left - 1)
 
-    assert msbuild is not None and msbuild.exists()
+    assert msbuild is not None and Path(msbuild).exists()
     return Path(msbuild)
 
 
 def ensure_cmake() -> Path:
     """Ensure that cmake is installed"""
-    _cmake = subcom.command.find("cmake")
-    if _cmake is not None and _cmake.exists():
+    _cmake = bmo.common.find_program("cmake")
+    if _cmake is not None and Path(_cmake).exists():
         return Path(_cmake)
 
     extra = []
-    if subcom.common.is_windows():
+    if bmo.common.is_windows():
         extra = ["--installargs", "ADD_CMAKE_TO_PATH"]
     install_pkg("cmake", extra=extra)
 
-    if (_cmake := subcom.command.find("cmake")) is None:
+    if (_cmake := bmo.common.find_program("cmake")) is None:
         raise RuntimeError("cmake could not be found")
     return Path(_cmake)

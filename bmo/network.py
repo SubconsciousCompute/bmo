@@ -7,7 +7,7 @@ import subprocess
 from urllib.parse import urlparse
 
 import dateutil.parser
-import dateutil.util
+import dateutil.utils
 
 import typer
 

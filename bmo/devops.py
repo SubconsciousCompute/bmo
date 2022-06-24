@@ -10,9 +10,9 @@ __email__ = "dilawar@subcom.tech"
 
 
 import typing as T
-from loguru import logger
+import logging
 import platform
-import subcom.command
+import bmo.common
 
 
 class DevOps(object):
@@ -35,7 +35,7 @@ class DevOps(object):
         self.arch = arch
         if self.arch is not None:
             assert self.arch == platform.architecture(), f"{self.arch=} != {platform.architecture()=}"
-        logger.info(f"{self.system=}, {self.arch=}")
+        logging.info(f"{self.system=}, {self.arch=}")
 
 
     def run(self, cmd: str):
@@ -47,6 +47,6 @@ class DevOps(object):
         """
         import subprocess
         command = cmd.split(' ')
-        executable = command[0] 
-        assert subcom.command.find_executable(executable) is not None, f"{executable=} not found"
+        executable = command[0]
+        assert bmo.common.find_program(executable) is not None, f"{executable=} not found"
         return subprocess.check_call(command)
