@@ -1,7 +1,6 @@
 __author__ = "Dilawar Singh"
 __email__ = "dilawar@subcom.tech"
 
-
 import logging
 import typing as T
 from pathlib import Path
@@ -27,10 +26,10 @@ def determine_lang_tools(dir: Path) -> T.Dict[str, str]:
 @app.command()
 def mypy(sdir: Path = Path("src")):
     """Run mypy linter in given directory"""
-    logging.info(f"Running mypy in {sdir}")
-    assert sdir.exists(), "f{sdir} doesn't exists"
+    logger.info(f"Running mypy in {dir}")
+    assert dir.exists(), "f{dir} doesn't exists"
     bmo.common.run_command(
-        f"poetry run mypy --ignore-missing-imports --install-types --non-interactive {str(sdir)}"
+        f"{sys.executable} -m mypy --ignore-missing-imports --install-types --non-interactive {str(dir)}"
     )
 
 

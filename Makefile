@@ -13,6 +13,9 @@ build:
 	$(POETRY) install
 	$(POETRY) build
 
+install:
+	$(POETRY) install
+
 ## DevOps
 
 fix:
