@@ -5,12 +5,12 @@ __email__ = "dilawar@subcom.tech"
 import tempfile
 import requests
 import logging
-
 from pathlib import Path
 
-from bmo.common import run_command
-
 import typer
+import validators
+
+from bmo.common import run_command
 
 app = typer.Typer()
 
@@ -37,16 +37,20 @@ def download_and_run_script(
     """
     SCRIPT_DIR = Path(tempfile.gettempdir()) / "bmo"
     SCRIPT_DIR.mkdir(parents=True, exist_ok=True)
+    REPO_URL = "https://gitlab.subcom.tech/open/scripts/"
 
-    if not script.startswith("http"):
-        script = f"https://gitlab.subcom.tech/open/scripts/-/raw/main/{script}"
+    if not validators.url(script):
+        # Example: https://gitlab.subcom.tech/open/scripts/-/raw/main/bootstrap_debian.sh
+        script = f"{REPO_URL}/-/raw/main/{script}"
+
+    assert validators.url(script), f"{script} is not a valid url"
 
     scriptname: str = script.rsplit("/", maxsplit=1)[-1]
     scriptpath = SCRIPT_DIR / scriptname
     if not scriptpath.exists() or force:
         res = requests.get(script)
         if res.status_code != 200:
-            logging.warn(f"Failed to download {script}")
+            logging.warning("Failed to download '{script}'. Please check the repository {REPO_URL}")
             return ""
         with open(scriptpath, "w") as f:
             f.write(res.text)
@@ -61,9 +65,11 @@ def download_and_run_script(
 
 
 def test_download_only():
-    text = download_and_run_script("debian_bootstrap.sh", download_only=True)
+    text = download_and_run_script("bootstrap_debian.sh", download_only=True)
+    assert len(text) > 0
+    assert "downloads.docker.com" in text
+    assert "node_exporter" in text
     print(text)
-
 
 
 if __name__ == "__main__":
