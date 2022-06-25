@@ -60,6 +60,6 @@ docs doc:
 
 
 tag:
-	git tag v$(poetry version -s)
+	git tag v$$(poetry version -s)
 
 .PHONY : bmo fix test install lint build all mypy check ci docs doc
