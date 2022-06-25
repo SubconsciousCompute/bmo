@@ -35,9 +35,6 @@ mypy:
 lint:
 	$(POETRY) run pylint -E bmo tests
 
-install:
-	$(PYTHON) -m pip install .
-
 ## Tests
 test: test_cli test_module
 
