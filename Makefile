@@ -1,4 +1,4 @@
-PYTHON := $(shell which python)
+PYTHON := $(shell which python3)
 POETRY := $(PYTHON) -m poetry
 
 MYPY_OPTS:=--ignore-missing-imports --install-types --non-interactive
