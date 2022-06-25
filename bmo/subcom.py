@@ -47,7 +47,9 @@ def download_and_run_script(
     if not scriptpath.exists() or force:
         res = requests.get(script)
         if res.status_code != 200:
-            logging.warning("Failed to download '{script}'. Please check the repository {REPO_URL}")
+            logging.warning(
+                "Failed to download '{script}'. Please check the repository {REPO_URL}"
+            )
             return ""
         with open(scriptpath, "w") as f:
             f.write(res.text)
@@ -56,8 +58,8 @@ def download_and_run_script(
         with scriptpath.open() as f:
             return f.read()
 
-    output = run_command(f"sh {scriptpath}")
-    print(output)
+    logging.info(f"Executing {scriptpath}")
+    output = run_command(f"bash {scriptpath}")
     return output
 
 
@@ -70,4 +72,3 @@ def test_download_only():
 
 if __name__ == "__main__":
     app()
-
