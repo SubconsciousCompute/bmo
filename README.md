@@ -36,9 +36,9 @@ Traceback (most recent call last):
     return __callback(*args, **kwargs)
   File "/home/dilawars/PY37/lib/python3.7/site-packages/typer/main.py", line 500, in wrapper
     return callback(**use_params)  # type: ignore
-  File "/home/dilawars/Work/GITHUB.COM/bmo/bmo/network.py", line 69, in check_ssl
-    assert notbefore is not None
-AssertionError
-Sentry is attempting to send 2 pending error messages
-Waiting up to 2 seconds
-Press Ctrl-C to quit
+  File "/home/dilawars/Work/GITHUB.COM/bmo/bmo/network.py", line 78, in check_ssl
+    assert notbefore is not None, out
+AssertionError: unable to load certificate
+140382921209664:error:0909006C:PEM routines:get_name:no start line:crypto/pem/pem_lib.c:745:Expecting: TRUSTED CERTIFICATE
+
+

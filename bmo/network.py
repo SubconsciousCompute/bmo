@@ -51,6 +51,8 @@ def check_ssl(server: str, port: int = 443):
         return ""
 
     domain = urlparse(server).netloc
+    server = server.replace("https://", "")
+
     logging.info(f"Checking certificate for server={server}, domain={domain}:{port}")
     # See https://docs.python.org/3/library/subprocess.html#replacing-shell-pipeline
     p1 = subprocess.Popen(
