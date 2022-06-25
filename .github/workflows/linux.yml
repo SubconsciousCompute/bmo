@@ -22,6 +22,13 @@ jobs:
         run: |
           make ci
 
+      - name: "Upload to pypi.org (nightly)"
+        env:
+          PYPI_UPLOAD_TOKEN: ${{ secrets.PYPI_UPLOAD_TOKEN }}
+        run: |
+          poetry version $(poetry version -s)-nightly-$(date '+%s')
+          make upload
+
       - name: "Upload to pypi.org"
         if: startsWith(github.ref, 'refs/tags/v')
         env:
