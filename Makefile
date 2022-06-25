@@ -1,4 +1,4 @@
-PYTHON := $(shell which python)
+PYTHON := $(shell which python3)
 POETRY := $(PYTHON) -m poetry
 
 MYPY_OPTS:=--ignore-missing-imports --install-types --non-interactive
@@ -54,7 +54,7 @@ test_cli: test_module
 
 # CICD pipeline
 ci:
-	python -m pip install poetry --upgrade
+	$(PYTHON) -m pip install poetry --upgrade
 	poetry install
 	$(MAKE) check
 	$(MAKE) test
