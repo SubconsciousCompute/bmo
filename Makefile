@@ -54,7 +54,7 @@ test_cli: test_module
 
 # CICD pipeline
 ci:
-	python -m pip install poetry --upgrade
+	$(PYTHON) -m pip install poetry --upgrade
 	poetry install
 	$(MAKE) check
 	$(MAKE) test
