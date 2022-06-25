@@ -45,12 +45,15 @@ def check_ssl(server: str, port: int = 443):
     """Check SSL certificate of a given url."""
     if not server.startswith("https"):
         server = f"https://{server}"
-    logging.info(f"Checking certificate for {server}")
     openssl = bmo.common.find_program("openssl")
-    assert openssl is not None
+    if openssl is None:
+        logging.info(f"openssl is not found. Please install it and try again.")
+        return ""
+
     domain = urlparse(server).netloc
+    logging.info(f"Checking certificate for server={server}, domain={domain}:{port}")
     # See https://docs.python.org/3/library/subprocess.html#replacing-shell-pipeline
-    pssl = subprocess.Popen(
+    p1 = subprocess.Popen(
         f"{openssl} s_client -servername {server} -connect {domain}:{port}".split(),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -58,12 +61,17 @@ def check_ssl(server: str, port: int = 443):
     )
     pparse = subprocess.Popen(
         f"{openssl} x509 -noout -dates".split(),
-        stdin=pssl.stdout,
+        stdin=p1.stdout,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
-    out = pparse.communicate()[0]
+
+    if p1 is not None and p1.stdout is not None:
+        p1.stdout.close()  # Allows pss1 to recieve a SIGPIPE if pparse exits.
+    out = (
+        pparse.communicate()[0] + pparse.communicate()[1]
+    )  # read from stdout and stderr
     logging.info(f"out={out}")
     notbefore = bmo.common.search_pat(r"notBefore=(.+?)\n", out)
     notafter = bmo.common.search_pat(r"notAfter=(.+?)\n", out)
