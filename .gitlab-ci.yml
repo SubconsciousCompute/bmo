@@ -11,3 +11,4 @@ build:
     - linux
   script:
     - make ci
+    - bash .ci/debian10.sh

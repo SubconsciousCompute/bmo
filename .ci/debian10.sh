@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -x
+
 sudo apt-get -y install python3-pip
 python3 -m pip install bmo
 bmo network check-ssl subcom.tech
