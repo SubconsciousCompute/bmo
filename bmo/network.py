@@ -63,8 +63,6 @@ def check_ssl(server: str, port: int = 443):
         stderr=subprocess.PIPE,
         text=True,
     )
-    if (psslstdout := pssl.stdout) is not None:
-        psslstdout.close()
     out = pparse.communicate()[0]
     notbefore = bmo.common.search_pat(r"notBefore=(.+?)\n", out)
     notafter = bmo.common.search_pat(r"notAfter=(.+?)\n", out)

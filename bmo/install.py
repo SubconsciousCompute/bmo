@@ -7,12 +7,14 @@ import tempfile
 import shutil
 import logging
 
+import typing as T
+
 from pathlib import Path
 
 
 import bmo.common
 
-def _get_manager_opts() -> list[str]:
+def _get_manager_opts() -> T.List[str]:
     if bmo.common.is_windows():
         _choco = bmo.common.find_program("choco")
         assert _choco is not None and Path(_choco).exists()
@@ -20,7 +22,7 @@ def _get_manager_opts() -> list[str]:
     return []
 
 
-def install_pkg(dep: str, extra: list[str] = []):
+def install_pkg(dep: str, extra: T.List[str] = []):
     """Install a pkg"""
     opts = _get_manager_opts()
     subprocess.check_output(["mpm"] + opts + extra + ["install", dep])
@@ -33,7 +35,8 @@ def ensure_choco() -> Path:
             f"choco.exe is available only on Windows. This system is {platform.system()}"
         )
 
-    if choco := shutil.which("choco.exe"):
+    choco = shutil.which("choco.exe")
+    if choco is not None:
         logging.info(f"choco.exe is already installed: {choco}")
         return Path(choco)
 
@@ -65,7 +68,7 @@ def ensure_visual_studio(
     )
 
     if msbuild is None and trial_left > 0:
-        logging.info(f"Trying to install {pkg} {trial_left=}")
+        logging.info(f"Trying to install {pkg}: trial left={trial_left}")
         install_pkg(pkg)
         ensure_visual_studio(trial_left=trial_left - 1)
 
@@ -84,6 +87,7 @@ def ensure_cmake() -> Path:
         extra = ["--installargs", "ADD_CMAKE_TO_PATH"]
     install_pkg("cmake", extra=extra)
 
-    if (_cmake := bmo.common.find_program("cmake")) is None:
+    _cmake = bmo.common.find_program("cmake")
+    if _cmake is None:
         raise RuntimeError("cmake could not be found")
     return Path(_cmake)

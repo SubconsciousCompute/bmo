@@ -16,8 +16,8 @@ from pathlib import Path
 def find(
     cmd: str,
     *,
-    hints: list[T.Union[str, Path]] = [],
-    subdirs: list[str] = [],
+    hints: T.List[T.Union[str, Path]] = [],
+    subdirs: T.List[str] = [],
     recursive: bool = False,
 ) -> T.Optional[Path]:
     """Find an executable.
@@ -40,9 +40,9 @@ def find(
 
     # If the full path is given, nothing to search. Return it.
     for cmd in (cmd, winname):
-        if p := Path(cmd):
-            if p.exists():
-                return p
+        p = Path(cmd)
+        if p.exists():
+            return p
 
     # Search in PATH using shutils.
     c = shutil.which(cmd)
@@ -62,15 +62,14 @@ def find(
             return e
 
         if recursive and e.is_dir():
-            if fs := list(e.glob(f"**/{cmd}")) + list(e.glob(f"**/{winname}")):
-                if fs:
-                    if len(fs) > 1:
-                        logging.warning(
-                            "Multiple binaries found with same name: \n\t"
-                            + "\n\t".join(map(str, fs))
-                            + ".\nReturning the first one."
-                        )
-                    return fs[0]
+            fs = T.List(e.glob(f"**/{cmd}")) + T.List(e.glob(f"**/{winname}"))
+            if len(fs) > 1:
+                logging.warning(
+                    "Multiple binaries found with same name: \n\t"
+                    + "\n\t".join(map(str, fs))
+                    + ".\nReturning the first one."
+                )
+            return fs[0] if len(fs) > 1 else None
     return None
 
 

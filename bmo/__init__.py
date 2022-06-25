@@ -1,6 +1,5 @@
-import importlib.metadata
-
-__version__ = importlib.metadata.version("bmo")
+import bmo.version
+__version__ = bmo.version.__version__
 
 import logging
 import sentry_sdk
@@ -18,3 +17,4 @@ sentry_sdk.init(
     integrations=[sentry_logging],
     traces_sample_rate=0.2,
 )
+

@@ -40,7 +40,7 @@ def is_windows(cygwin_is_windows: bool = True) -> bool:
 
 
 def find_program(
-    name: str, hints: list[T.Union[Path, str]] = [], recursive: bool = False
+    name: str, hints: T.List[T.Union[Path, str]] = [], recursive: bool = False
 ) -> T.Optional[str]:
     """where is a given binary"""
     for hint in hints:
@@ -48,7 +48,8 @@ def find_program(
         if not hint.exists():
             continue
         for p in glob.glob(f"{hint}/**/{name}", recursive=recursive):
-            if (prg := shutil.which(p)) is not None:
+            prg  = shutil.which(p)
+            if prg is not None:
                 return prg
     return shutil.which(name)
 
