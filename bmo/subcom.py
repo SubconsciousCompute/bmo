@@ -8,7 +8,6 @@ import logging
 from pathlib import Path
 
 import typer
-import validators
 
 from bmo.common import run_command
 
@@ -39,11 +38,9 @@ def download_and_run_script(
     SCRIPT_DIR.mkdir(parents=True, exist_ok=True)
     REPO_URL = "https://gitlab.subcom.tech/open/scripts/"
 
-    if not validators.url(script):
+    if "https://" not in script[-10:] or "http://" not in script[-10:]:
         # Example: https://gitlab.subcom.tech/open/scripts/-/raw/main/bootstrap_debian.sh
         script = f"{REPO_URL}/-/raw/main/{script}"
-
-    assert validators.url(script), f"{script} is not a valid url"
 
     scriptname: str = script.rsplit("/", maxsplit=1)[-1]
     scriptpath = SCRIPT_DIR / scriptname
