@@ -9,15 +9,13 @@ bootstrap:
 	$(PYTHON) -m ensurepip
 	$(PYTHON) -m pip install poetry
 
-build:
-	$(POETRY) install
+build: install
 	$(POETRY) build
 
 install:
 	$(POETRY) install
 
 ## DevOps
-
 fix:
 	$(POETRY) run black bmo
 	$(POETRY) run black tests
@@ -28,15 +26,12 @@ upload: build
 
 check: mypy lint
 
-mypy:
+mypy: install
 	$(POETRY) install
 	$(POETRY) run mypy $(MYPY_OPTS) bmo tests
 
-lint:
+lint: install
 	$(POETRY) run pylint -E bmo tests
-
-install:
-	$(PYTHON) -m pip install .
 
 ## Tests
 test: test_cli test_module
@@ -63,5 +58,8 @@ docs doc:
 	$(PYTHON) -m pip install -r docs/requirements.txt
 	mkdocs build
 
+
+tag:
+	git tag v$(poetry version -s)
 
 .PHONY : bmo fix test install lint build all mypy check ci docs doc
