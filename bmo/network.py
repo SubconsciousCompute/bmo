@@ -64,10 +64,11 @@ def check_ssl(server: str, port: int = 443):
         text=True,
     )
     out = pparse.communicate()[0]
+    logging.info(f"out={out}")
     notbefore = bmo.common.search_pat(r"notBefore=(.+?)\n", out)
     notafter = bmo.common.search_pat(r"notAfter=(.+?)\n", out)
-    assert notbefore is not None
-    assert notafter is not None
+    assert notbefore is not None, out
+    assert notafter is not None, out
     notbefore = parse_x509_date(notbefore.group(1))
     notafter = parse_x509_date(notafter.group(1))
     timetoexpire = (notafter - dateutil.utils.today(notafter.tzinfo)).days
