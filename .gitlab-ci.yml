@@ -3,7 +3,7 @@ image: debian:10.8
 before_script:
   - apt update
   - apt install -y gcc make python3-pip python3
-  - python -m pip install poetry
+  - python3 -m pip install poetry
 
 build:
   stage: build
