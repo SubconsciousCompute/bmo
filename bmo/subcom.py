@@ -56,7 +56,7 @@ def download_and_run_script(
         with scriptpath.open() as f:
             return f.read()
 
-    output = run_command(f"bash -c {scriptpath}")
+    output = run_command(f"sh {scriptpath}")
     print(output)
     return output
 
